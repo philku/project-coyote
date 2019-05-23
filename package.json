@@ -1,0 +1,23 @@
+{
+  "name": "projectcoyote",
+  "version": "1.0.0",
+  "description": "Project Coyote",
+  "main": "app.js",
+  "scripts": {
+    "test": "ls -l",
+    "start": "nodemon --watch src -e js src/app.js"
+  },
+  "author": "Bob Deemer, Dylan Wiafe, Phil Kubin",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "nodemon": "^1.18.7",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2",
+    "sha256": "^0.2.0",
+    "uuid": "^3.3.2",
+    "express-handlebars": "^3.0.0",
+    "handlebars": "^4.0.12"
+  }
+}
