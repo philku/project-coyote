@@ -1,4 +1,4 @@
-// App setup
+// App setup - this is for end-user interaction
 
 // Node modules
 const express = require('express');
@@ -38,6 +38,8 @@ let params = {};
 
 
 // init blockchain params
+const DonorBlockchain = require('./blockchains/donor.blockchain');
+const donorBlockchain = new DonorBlockchain();
 
 
 // Routes
@@ -67,6 +69,56 @@ app.get('/disaster', (req,res) => {
 
 app.get('/supply', (req,res) => {
 	supply.render(req,res);
+});
+
+
+
+////  Blockchain API calls
+
+//***************** Donors ****************
+app.get('/api/blockchain/donor/add', (req,res) => {
+	// add donor to blockchain
+
+	// Hardcoded for now
+	donorObject = {
+		email: "bdeemer@gmail.com",
+		fname: "Bob",
+		lname: "Deemer",
+		organization: "Project Coyote"
+	};
+
+	donorBlockchain.addDonorToPendingDonors(donorBlockchain.createNewDonor(donorObject));
+	res.send('donor added to pending queue<br><a href="/donor">DOnor Page</a><br>');
+});
+
+app.get('/api/blockchain/donor/mine', (req,res) => {
+	const lastBlock = donorBlockchain.getLastBlock();
+	const previousBlockHash = lastBlock.hash;
+
+	// currentBlockData can take anything you want to put in here
+	const currentBlockData = {
+		donors: donorBlockchain.pendingDonors,
+		index: lastBlock.index + 1
+	};
+	const nonce = donorBlockchain.proofOfWork(previousBlockHash, currentBlockData);
+	const blockHash = donorBlockchain.hashBlock(nonce, previousBlockHash, currentBlockData);
+	const newBlock = donorBlockchain.createNewBlock(nonce, previousBlockHash, blockHash);
+
+	console.log('block should be mined: ', donorBlockchain.chain);
+	console.log('donors in this block: ', newBlock);
+	res.send('Donor block mined.<br><A href="/donor">Donor page</a><br>');
+
+});
+
+
+app.get('/api/blockchain/donor/list', (req,res) => {
+	// use blockchain to list donors
+
+});
+
+
+app.get('/api/blockchain/donor/donations', (req,res) => {
+	// list donations by a donor
 });
 
 
