@@ -1,28 +1,29 @@
 /**
- * 
- * This blockchain contains all things that will relate to donors
- * and donor information.
+ * Main file that contains all functions to interact with the blockchain
  *
  *
  *
+ * @ToDo
+ *	1) Convert this to a class in project 2 (section 2 lesson 10)
  *
  *
  **/ 
 
+/**
+ * Questions / things to try
+ *	1) Can you read the chain in the constructor from a file/files?
+ *
+ *
+ *
+ **/
 
 const sha256 = require('sha256');
 const currentNodeURL = process.argv[3]
 const uuid = require('uuid/v1');
 
-
-/**
- * Blockchain contructor
- *
- **/
-
-function DonorBlockchain() {
+function Blockchain() {
 	this.chain = [];
-	this.pendingDonors = [];
+	this.pendingTransactions = [];
 
 	this.currentNodeURL = currentNodeURL;
 	this.networkNodes = [];
@@ -33,69 +34,46 @@ function DonorBlockchain() {
 
 
 
-/**
- * function createNewBlock - Creates a new block and adds to to the existing blockchain
- *
- *	@param {integer} nonce - The nonce of this block
- *	@param {string} previousBlockHash - The hash of the previous block
- *	@param {string} hash - The hash of this block
- *
- *	@return {object} - The complete block that was added to the blockchain
- *
- *
- **/
-
-DonorBlockchain.prototype.createNewBlock = function(nonce, previousBlockHash, hash) {
+// Take pending transaction, create a new block, and add it to the chain.
+Blockchain.prototype.createNewBlock = function(nonce, previousBlockHash, hash) {
 	const newBlock = {
 		index: this.chain.length + 1,
 		timestamp: Date.now(),
-		donors:  this.pendingDonors,
+		transactions:  this.pendingTransactions,
 		nonce,
 		hash,
 		previousBlockHash
 	};
 
-	this.pendingDonors = [];
+	this.pendingTransactions = [];
 	this.chain.push(newBlock);
 	return newBlock;
 }; // end createNewBlock
 
-
-/**
- *
- * function getLastBlock - returns the last block on the blockchain.
- *
- *	@param {none}
- *
- *	@return {object} - The last block that was added to the blockchain
- *
- */
-
-DonorBlockchain.prototype.getLastBlock = function() {
+Blockchain.prototype.getLastBlock = function() {
 	return this.chain[this.chain.length-1];
 }; // end getLastBlock()
 
 
 
-DonorBlockchain.prototype.createNewDonor = function ({ email, fname, lname, organization }) {
-	const newDonor = {
-		donorID: uuid().split('-').join(''),
-		email: email,
-		fname: fname,
-		lname: lname,
-		organization: organization
+
+Blockchain.prototype.createNewTransaction = function (amount, sender, recipient) {
+	const newTransaction = {
+		amount: amount,
+		sender: sender,
+		recipient: recipient,
+		transactionID: uuid().split('-').join('')
 	};
-	return newDonor;
-}; // end createNewDonor()
+	return newTransaction;
+}; // end createNewTransaction()
 
 
-DonorBlockchain.prototype.addDonorToPendingDonors = function(donorObj) {
-	this.pendingDonors.push(donorObj);
-	// why does this return the id of the next block?
+Blockchain.prototype.addTransactionToPendingTransactions = function(transactionObj) {
+	this.pendingTransactions.push(transactionObj);
 	return this.getLastBlock().index + 1;
 };
 
-DonorBlockchain.prototype.hashBlock = function(nonce, previousBlockHash, currentBlockData) {
+Blockchain.prototype.hashBlock = function(nonce, previousBlockHash, currentBlockData) {
 	// concat the previousBlockHash, the currentBlock Data, and the nonce to ensure uniqueness.
 	const data = previousBlockHash + nonce.toString() + JSON.stringify(currentBlockData);
 	const hash = sha256(data);
@@ -107,7 +85,7 @@ DonorBlockchain.prototype.hashBlock = function(nonce, previousBlockHash, current
  *	
  *
  **/
-DonorBlockchain.prototype.proofOfWork = function(previousBlockHash, currentBlockData) {
+Blockchain.prototype.proofOfWork = function(previousBlockHash, currentBlockData) {
 	let nonce=0;
 
 	let hash = this.hashBlock(nonce, previousBlockHash, currentBlockData);
@@ -122,7 +100,7 @@ DonorBlockchain.prototype.proofOfWork = function(previousBlockHash, currentBlock
 	return nonce;
 }; // end proofOfWork
 
-DonorBlockchain.prototype.isChainValid = function(blockchain) {
+Blockchain.prototype.isChainValid = function(blockchain) {
 	let isValidChain = true;
 
 	for(var i=1; i<blockchain.length;i++) {
@@ -152,7 +130,7 @@ DonorBlockchain.prototype.isChainValid = function(blockchain) {
 }; // end isChainValid()
 
 
-DonorBlockchain.prototype.getBlock = function(blockHash) {
+Blockchain.prototype.getBlock = function(blockHash) {
 	// get a block with a certain blockHash and return it
 	let correctBlock = null;
 
@@ -166,39 +144,7 @@ DonorBlockchain.prototype.getBlock = function(blockHash) {
 	return correctBlock;
 };
 
-DonorBlockchain.prototype.getDonorData = function({ donorID }) {
-	const donorData = {};
-	let found = false;
-
-	for(let x=this.chain.length-1; x>0; x--) {
-		const theBlock = this.chain[x];
-		theBlock.donors.forEach((donor) => {
-			if(donors.donorID == donorID) {
-				donorData = donor;
-				found = true;
-			}
-		});
-
-		if(found) {
-			break;
-		}
-	}
-
-	return {
-		donorData
-	}
-};
-
-
-
-//////////////////// below here needs reviewed for donor content
-
-
-/**
- * I do not think this (or its equivalent form) is needed.. . commenting out
-   but keeping for now. . . 
-
-DonorBlockchain.prototype.getTransaction = function(transactionID) {
+Blockchain.prototype.getTransaction = function(transactionID) {
 	// get a block with a certain blockHash and return it
 	let correctBlockTransaction = null;
 	let correctBlock = null;
@@ -219,7 +165,33 @@ DonorBlockchain.prototype.getTransaction = function(transactionID) {
 	};
 };
 
- *
- **/
+Blockchain.prototype.getAddressData = function(address) {
+	const addressTransactions = [];
 
-module.exports = DonorBlockchain;
+	this.chain.forEach((block) => {
+		block.transactions.forEach((transaction) => {
+			if(transaction.sender === address || transaction.recipient === address) {
+				addressTransactions.push(transaction);
+			}
+		});
+	});
+
+	// now calculate balance
+	let balance = 0.0;
+	addressTransactions.forEach((transaction) => {
+		if(transaction.sender === address) {
+			balance -= transaction.amount;
+		} else if(transaction.recipient === address) {
+			balance += transaction.amount;
+		}
+	});
+
+	return {
+		addressTransactions: addressTransactions,
+		addressBalance: balance
+	};
+};
+
+
+
+module.exports = Blockchain;
