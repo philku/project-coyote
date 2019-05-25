@@ -104,7 +104,7 @@ app.get('/api/blockchain/donor/mine', (req,res) => {
 	const blockHash = donorBlockchain.hashBlock(nonce, previousBlockHash, currentBlockData);
 	const newBlock = donorBlockchain.createNewBlock(nonce, previousBlockHash, blockHash);
 
-	console.log('block should be mined: ', donorBlockchain.chain);
+	//console.log('block should be mined: ', donorBlockchain.chain);
 	console.log('donors in this block: ', newBlock);
 	res.send('Donor block mined.<br><A href="/donor">Donor page</a><br>');
 
@@ -113,9 +113,38 @@ app.get('/api/blockchain/donor/mine', (req,res) => {
 
 app.get('/api/blockchain/donor/list', (req,res) => {
 	// use blockchain to list donors
+	let IDs = [];
+	let donors = [];
+
+	for(let x = donorBlockchain.chain.length-1;x>0;x--) {
+		thisBlock = donorBlockchain.chain[x];
+		thisBlock.donors.forEach((donor) => {
+			if(IDs.indexOf(donor.donorID) === -1) {
+				IDs.push(donor.donorID);
+				donors.push(donor);
+			}
+		});
+	}
+
+	let output = "";
+	donors.forEach((donor) => {
+		output += `${donor.fname} ${donor.lname} (ID: ${donor.donorID})<br>`;
+	});
+
+	res.send(`<b>donor list:</b><br>${output}<br><br><a href="/donor">Main donor page</a>`);
+	console.log('^^^^^ donor list: ', donors);
 
 });
 
+app.get('/api/blockchain/donor/details', (req,res) => {
+	// just list the details of the first donor in the blockchain for skeleton
+	let blockData = donorBlockchain.chain[1];
+	let donor = blockData.donors[0];
+	console.log('donor details path (only first donor in blockchain is display for proof of concept): ', donor);
+
+	res.send(`Donor details: <br>fname: ${donor.fname}<br>last name: ${donor.lname}<br>org: ${donor.organization}<br>donor email: ${donor.email}<br>Donor ID: ${donor.donorID}<br><br><a href='/donor'>Donor home</a>`);
+
+});
 
 app.get('/api/blockchain/donor/donations', (req,res) => {
 	// list donations by a donor
