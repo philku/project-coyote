@@ -166,14 +166,14 @@ DonorBlockchain.prototype.getBlock = function(blockHash) {
 	return correctBlock;
 };
 
-DonorBlockchain.prototype.getDonorData = function({ donorId }) {
+DonorBlockchain.prototype.getDonorData = function({ donorID }) {
 	const donorData = {};
 	let found = false;
 
 	for(let x=this.chain.length-1; x>0; x--) {
 		const theBlock = this.chain[x];
 		theBlock.donors.forEach((donor) => {
-			if(donors.donorId == donorId) {
+			if(donors.donorID == donorID) {
 				donorData = donor;
 				found = true;
 			}
