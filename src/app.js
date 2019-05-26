@@ -41,6 +41,8 @@ let params = {};
 const DonorBlockchain = require('./blockchains/donor.blockchain');
 const donorBlockchain = new DonorBlockchain();
 
+const DisasterBlockchain = require('./blockchains/disaster.blockchain');
+const disasterBlockchain = new DisasterBlockchain();
 
 // Routes
 
@@ -147,10 +149,81 @@ app.get('/api/blockchain/donor/details', (req,res) => {
 });
 
 app.get('/api/blockchain/donor/donations', (req,res) => {
-	// list donations by a donor
+	// list donations by a donor - needs the disaster blockchain
 });
 
 
+
+
+
+
+
+
+
+
+/// Disaster endpoints
+app.get('/api/blockchain/disaster/add', (req,res) => {
+	const disaster = {
+		latitude: "41N 17' 45\"",
+		longitude: "103W 22' 55\"",
+		city: "Nassau",
+		state: null,
+		country: "Bahamas",
+		type: "Hurricane",
+		description: "Category 5 hurricane."
+	}
+
+	disasterBlockchain.addDisasterToPendingDisasters(disasterBlockchain.createNewDisaster(disaster));
+	res.send('DIsaster added to pending disasters<br><br><a href="/disaster">Disaster Home</a>');
+});
+
+
+app.get('/api/blockchain/disaster/mine', (req,res) => {
+	const lastBlock = disasterBlockchain.getLastBlock();
+	const previousBlockHash = lastBlock.hash;
+
+	// currentBlockData can take anything you want to put in here
+	const currentBlockData = {
+		disasters: disasterBlockchain.pendingDisasters,
+		index: lastBlock.index + 1
+	};
+	const nonce = disasterBlockchain.proofOfWork(previousBlockHash, currentBlockData);
+	const blockHash = disasterBlockchain.hashBlock(nonce, previousBlockHash, currentBlockData);
+	const newBlock = disasterBlockchain.createNewBlock(nonce, previousBlockHash, blockHash);
+
+	//console.log('block should be mined: ', donorBlockchain.chain);
+	console.log('disasters in this block: ', newBlock);
+	res.send('Disaster block mined.<br><A href="/disaster">Disaster page</a><br>');
+
+});
+
+
+app.get('/api/blockchain/disaster/list', (req,res) => {
+	// use blockchain to list donors
+	let IDs = [];
+	let disasters = [];
+
+	for(let x = disasterBlockchain.chain.length-1;x>0;x--) {
+		thisBlock = disasterBlockchain.chain[x];
+		thisBlock.disasters.forEach((disaster) => {
+			if(IDs.indexOf(disaster.disasterID) === -1) {
+				IDs.push(disaster.disasterID);
+				disasters.push(disaster);
+			}
+		});
+	}
+
+	let output = "";
+	disasters.forEach((disaster) => {
+		output += `type: ${disaster.type}<br> Lat: ${disaster.latitude}<br>Long: ${disaster.longitude}<br>city/state/country: ${disaster.city}, ${disaster.state}, ${disaster.country}<br>Notes: ${disaster.description}<br><br><br>`;
+	});
+
+	res.send(`<b>disaster list:</b><br>${output}<br><br><a href="/disaster">Main disaster page</a>`);
+});
+
+
+
+// 404 error page
 app.get('*', (req,res) => {
 	errorPage.render(req,res);
 })
