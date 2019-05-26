@@ -14,7 +14,7 @@ const uuid = require('uuid/v1');
 
 /**
  *
- * Donor blockchain contructor
+ * Disaster blockchain contructor
  *
  **/
 
