@@ -112,7 +112,7 @@ DonorBlockchain.prototype.createNewDonor = function ({ email, fname, lname, orga
  *
  **/
 
-DonorBlockchain.prototype.addDonorToPendingDonors = function({ donorObj }) {
+DonorBlockchain.prototype.addDonorToPendingDonors = function(donorObj) {
 	this.pendingDonors.push(donorObj);
 	// why does this return the id of the next block?
 	return this.getLastBlock().index + 1;
