@@ -253,7 +253,7 @@ DisasterBlockchain.prototype.getBlock = function(blockHash) {
  **/
  
 DisasterBlockchain.prototype.getDisasterData = function({ disasterID }) {
-	const disasterData = {};
+	let disasterData = {};
 	let found = false;
 
 	for(let x=this.chain.length-1; x>0; x--) {
