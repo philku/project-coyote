@@ -31,7 +31,7 @@ app.engine('html', exphbs( {
 const index = require('./scripts/index.controller');
 const disaster = require('./scripts/disaster.controller');
 const donor = require('./scripts/donor.controller');
-const supply = require('./scripts/supply.controller');
+const resource = require('./scripts/resource.controller');
 const errorPage = require('./scripts/errorPage.controller');
 
 let params = {};
@@ -44,15 +44,16 @@ const donorBlockchain = new DonorBlockchain();
 const DisasterBlockchain = require('./blockchains/disaster.blockchain');
 const disasterBlockchain = new DisasterBlockchain();
 
+const ResourceBlockchain = require('./blockchains/resource.blockchain');
+const resourceBlockchain = new ResourceBlockchain();
+
+
 // Routes
 
 /**
  *
  * To Do:
  *	1) For each route, make a separate script in /scripts and call it so this file does not get huge
- *
- *
- *
  *
  **/
 
@@ -69,8 +70,8 @@ app.get('/disaster', (req,res) => {
 	disaster.render(req,res);
 });
 
-app.get('/supply', (req,res) => {
-	supply.render(req,res);
+app.get('/resource', (req,res) => {
+	resource.render(req,res);
 });
 
 
@@ -161,7 +162,7 @@ app.get('/api/blockchain/donor/donations', (req,res) => {
 
 
 
-/// Disaster endpoints
+///***************** Disaster endpoints
 app.get('/api/blockchain/disaster/add', (req,res) => {
 	const disaster = {
 		latitude: "41N 17' 45\"",
@@ -221,6 +222,94 @@ app.get('/api/blockchain/disaster/list', (req,res) => {
 	res.send(`<b>disaster list:</b><br>${output}<br><br><a href="/disaster">Main disaster page</a>`);
 });
 
+
+
+//************ resource endpoints
+
+app.get('/api/blockchain/resource/add', (req,res) => {
+	const resourceObject = {
+		title: "Bottled Water",
+		description: "16.9oz bottle of water",
+		UNNumber: "UN-WATER-001"
+	};
+
+	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
+
+	resourceObject.title = "Non Perishable Food";
+	resourceObject.description = "Any canned or non-perishable food item";
+	resourceObject.UNNumber = "UN-FOOD-001";
+	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
+
+	resourceObject.title = "Clothing";
+	resourceObject.description = "Gently used clothing";
+	resourceObject.UNNumber = "UN-CLOTHING-001";
+	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
+
+	resourceObject.title = "Shoes";
+	resourceObject.description = "Mens / Womens / Childrens shoes";
+	resourceObject.UNNumber = "UN-CLOTHING-002";
+	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
+
+	resourceObject.title = "Ibuprofen";
+	resourceObject.description = "200 Ibuprofen tablets";
+	resourceObject.UNNumber = "UN-MEDS-001";
+	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
+
+	resourceObject.title = "Bandages";
+	resourceObject.description = "Any bandages and size with adhesive";
+	resourceObject.UNNumber = "UN-MEDS-002";
+	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
+
+	res.send('Added 6 items to the pending resources queue.<br><a href="/resource">Resources main</a>');
+});
+
+
+
+
+// mine
+app.get('/api/blockchain/resource/mine', (req,res) => {
+	const lastBlock = resourceBlockchain.getLastBlock();
+	const previousBlockHash = lastBlock.hash;
+
+	// currentBlockData can take anything you want to put in here
+	const currentBlockData = {
+		resources: resourceBlockchain.pendingResources,
+		index: lastBlock.index + 1
+	};
+	const nonce = resourceBlockchain.proofOfWork(previousBlockHash, currentBlockData);
+	const blockHash = resourceBlockchain.hashBlock(nonce, previousBlockHash, currentBlockData);
+	const newBlock = resourceBlockchain.createNewBlock(nonce, previousBlockHash, blockHash);
+
+	//console.log('block should be mined: ', donorBlockchain.chain);
+	console.log('resources in this block: ', newBlock);
+	res.send('Resource block mined.<br><A href="/resource">Resource page</a><br>');
+
+});
+
+// list
+app.get('/api/blockchain/resource/list', (req,res) => {
+	// use blockchain to list resources
+	let IDs = [];
+	let resources = [];
+
+	for(let x = resourceBlockchain.chain.length-1;x>0;x--) {
+		thisBlock = resourceBlockchain.chain[x];
+		thisBlock.resources.forEach((resource) => {
+			if(IDs.indexOf(resource.resourceID) === -1) {
+				IDs.push(resource.resourceID);
+				resources.push(resource);
+			}
+		});
+	}
+
+	let output = "";
+	console.log('resource array after looking: ', resources);
+	resources.forEach((resource) => {
+		output += `title: ${resource.title}<br> desc: ${resource.description}<br>UNNumber: ${resource.UNNumber}<br><br>`;
+	});
+
+	res.send(`<b>resource list:</b><br>${output}<br><br><a href="/resource">Main resource page</a>`);
+});
 
 
 // 404 error page
