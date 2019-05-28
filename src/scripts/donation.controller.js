@@ -1,9 +1,9 @@
 const utils = require('./utils');
 
 function _render(req,res,pageData={}) {
-	console.log('^^^^ rendering disaster');
+	console.log('^^^^ rendering donations');
 	let params = {
-		template: 'disaster',
+		template: 'donation',
 		pageData: pageData
 	};
 	utils.render(req,res,params);

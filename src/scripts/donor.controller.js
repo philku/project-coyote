@@ -1,9 +1,11 @@
 const utils = require('./utils');
 
-function _render(req,res) {
+function _render(req,res,pageData={}) {
 	console.log('^^^^ rendering donor');
-	let params = {};
-	params.template = 'donor';
+	let params = {
+		template: 'donor',
+		pageData: pageData
+	};
 	utils.render(req,res,params);
 }
 
