@@ -1,8 +1,10 @@
 const utils = require('./utils');
 
-function _render(req,res,data={}) {
-	let params = {};
-	params.template = '404';
+function _render(req,res,pageData={}) {
+	let params = {
+		template: '404',
+		pageData: pageData
+	};
 	utils.render(req,res,params);
 }
 
