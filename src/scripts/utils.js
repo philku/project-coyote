@@ -14,7 +14,7 @@
  *
  **/
 _render = (req, res, params={}) => {
-	const context = {};
+	const context = params;
 	context.pageTitle = getPageTitle(params.template);
 	res.render(params.template,context);
 } //end render()

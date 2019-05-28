@@ -27,18 +27,7 @@ app.engine('html', exphbs( {
 }));
 
 
-// Other initializations
-const index = require('./scripts/index.controller');
-const disaster = require('./scripts/disaster.controller');
-const donor = require('./scripts/donor.controller');
-const resource = require('./scripts/resource.controller');
-const donation = require('./scripts/donation.controller');
-const errorPage = require('./scripts/errorPage.controller');
-
-let params = {};
-
-
-// init blockchain params
+// init various blockchains
 const DonorBlockchain = require('./blockchains/donor.blockchain');
 const donorBlockchain = new DonorBlockchain();
 
@@ -52,6 +41,19 @@ const DonationBlockchain = require('./blockchains/donation.blockchain');
 const donationBlockchain = new DonationBlockchain();
 
 
+// Page controllers
+const index = require('./scripts/index.controller');
+const disaster = require('./scripts/disaster.controller');
+const donor = require('./scripts/donor.controller');
+const resource = require('./scripts/resource.controller');
+const donation = require('./scripts/donation.controller');
+const errorPage = require('./scripts/errorPage.controller');
+
+
+// Other varables needed
+let pageData = {}; // data that will be passed to the page to display
+
+
 // Routes
 
 /**
@@ -61,24 +63,24 @@ const donationBlockchain = new DonationBlockchain();
  *
  **/
 
-app.get('/', (req,res) => {
-	index.render(req,res);
+app.get('/', (req,res,data) => {
+	index.render(req,res,data);
 });
 
 
-app.get('/donor', (req,res) => {
+app.get('/donor', (req,res,data) => {
 	donor.render(req,res);
 });
 
-app.get('/disaster', (req,res) => {
+app.get('/disaster', (req,res,data) => {
 	disaster.render(req,res);
 });
 
-app.get('/resource', (req,res) => {
+app.get('/resource', (req,res,data) => {
 	resource.render(req,res);
 });
 
-app.get('/donation', (req,res) => {
+app.get('/donation', (req,res,data) => {
 	donation.render(req,res);
 });
 
