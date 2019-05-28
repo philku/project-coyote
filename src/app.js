@@ -32,6 +32,7 @@ const index = require('./scripts/index.controller');
 const disaster = require('./scripts/disaster.controller');
 const donor = require('./scripts/donor.controller');
 const resource = require('./scripts/resource.controller');
+const donation = require('./scripts/donation.controller');
 const errorPage = require('./scripts/errorPage.controller');
 
 let params = {};
@@ -46,6 +47,9 @@ const disasterBlockchain = new DisasterBlockchain();
 
 const ResourceBlockchain = require('./blockchains/resource.blockchain');
 const resourceBlockchain = new ResourceBlockchain();
+
+const DonationBlockchain = require('./blockchains/donation.blockchain');
+const donationBlockchain = new DonationBlockchain();
 
 
 // Routes
@@ -74,6 +78,10 @@ app.get('/resource', (req,res) => {
 	resource.render(req,res);
 });
 
+app.get('/donation', (req,res) => {
+	donation.render(req,res);
+});
+
 
 
 ////  Blockchain API calls
@@ -83,7 +91,7 @@ app.get('/api/blockchain/donor/add', (req,res) => {
 	// add donor to blockchain
 
 	// Hardcoded for now
-	donorObject = {
+	const donorObject = {
 		email: "bdeemer@gmail.com",
 		fname: "Bob",
 		lname: "Deemer",
@@ -149,8 +157,84 @@ app.get('/api/blockchain/donor/details', (req,res) => {
 
 });
 
-app.get('/api/blockchain/donor/donations', (req,res) => {
-	// list donations by a donor - needs the disaster blockchain
+
+app.get('/api/blockchain/donor/addDonation', (req,res) => {
+	// get donor info from donor #1
+	const donorBlockData = donorBlockchain.chain[1];
+	const donor = donorBlockData.donors[0];
+
+	// get disaster info from disaster #1
+	const disasterBlockData = disasterBlockchain.chain[1];
+	const disaster = disasterBlockData.disasters[0];
+
+
+	const resources = [
+		{
+			UNNumber: "UN-WATER-001",
+			Qty: 1000
+		},
+
+		{
+			UNNumber: "UN-FOOD-001",
+			Qty: 2000
+		},
+		{
+			UNNumber: "UN-CLOTHING-001",
+			Qty: 2500
+		}
+	];
+
+
+	const donationObject = {
+		dateTime: new Date(),
+		disasterID: disaster.disasterID,
+		donorID: donor.donorID,
+		resources: resources,
+		sendDate: null,
+		arriveDate: null
+	}
+
+	donationBlockchain.addDonationToPendingDonations(donationBlockchain.createNewDonation(donationObject));
+	res.send('added hardcoded resources from donor #1 to disaster #1<br><br><a href="/donor">Donor Home</a><br><br><a href="/donation">Donations Home</a>');
+});
+
+app.get('/api/blockchain/donor/mineDonations', (req,res) => {
+
+	const lastBlock = donationBlockchain.getLastBlock();
+	const previousBlockHash = lastBlock.hash;
+
+	// currentBlockData can take anything you want to put in here
+	const currentBlockData = {
+		donations: donationBlockchain.pendingDonations,
+		index: lastBlock.index + 1
+	};
+	const nonce = donationBlockchain.proofOfWork(previousBlockHash, currentBlockData);
+	const blockHash = donationBlockchain.hashBlock(nonce, previousBlockHash, currentBlockData);
+	const newBlock = donationBlockchain.createNewBlock(nonce, previousBlockHash, blockHash);
+
+	//console.log('block should be mined: ', donorBlockchain.chain);
+	console.log('donations in this block: ', newBlock);
+	res.send('Donations block mined.<br><A href="/donor">Donor page</a><br><br><a href="/donation">Donations Home</a>');
+});
+
+
+app.get('/api/blockchain/donation/list', (req,res) => {
+	// list all donations
+	const donationBlock = donationBlockchain.chain[1];
+	const donations = donationBlock.donations;
+
+	let output = "";
+
+	donations.forEach((donation) =>{
+		output += `(Disaster ID: ${donation.disasterID}<br>DOnor ID: ${donation.donorID}<br>Resources:<br>`;
+		
+		donation.resources.forEach((resource) => {
+			output += `Quantity: ${resource.Qty} / UN Part number: ${resource.UNNumber}<br>`;
+		});
+		output += "<br><br>";
+	});
+
+	res.send(`<a href='/donation'>Donation Home</a><br><br>${output}`);
 });
 
 
