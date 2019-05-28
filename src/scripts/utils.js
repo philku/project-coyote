@@ -1,5 +1,5 @@
 /**
- * function _render - renders a given page
+ * function _render - renders a page
  *
  *	@param {Object} req - The express request object
  *	@param {Object} res - The express response object
@@ -20,15 +20,14 @@ _render = (req, res, params={}) => {
 } //end render()
 
 
-////////// Internal functions not exposed to the app
-
 /**
- * Returns the page title for each page
+ * function getPageTitle - Returns the page title for given page
  *
  *	@param {string} template = The template being displayed.
  *
  *	@return {string} - Title of the page
- */
+ *
+ **/
 getPageTitle = template => {
 	let pageTitles = {
 		index: "Project Coyote",
