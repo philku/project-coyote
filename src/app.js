@@ -63,25 +63,25 @@ let pageData = {}; // data that will be passed to the page to display
  *
  **/
 
-app.get('/', (req,res,data) => {
+app.get('/', (req,res) => {
 	index.render(req,res,data);
 });
 
 
-app.get('/donor', (req,res,data) => {
-	donor.render(req,res);
+app.get('/donor', (req,res) => {
+	donor.render(req,res,data);
 });
 
-app.get('/disaster', (req,res,data) => {
-	disaster.render(req,res);
+app.get('/disaster', (req,res) => {
+	disaster.render(req,res,data);
 });
 
-app.get('/resource', (req,res,data) => {
-	resource.render(req,res);
+app.get('/resource', (req,res) => {
+	resource.render(req,res,data);
 });
 
-app.get('/donation', (req,res,data) => {
-	donation.render(req,res);
+app.get('/donation', (req,res) => {
+	donation.render(req,res,data);
 });
 
 
