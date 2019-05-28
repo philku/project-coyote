@@ -4,7 +4,7 @@ function _render(req,res,pageData={}) {
 	console.log('^^^^ rendering donations');
 	let params = {
 		template: 'donation',
-		data: pageData
+		pageData: pageData
 	};
 	utils.render(req,res,params);
 }
