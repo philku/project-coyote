@@ -13,10 +13,12 @@
  *
  *
  **/
-_render = (req, res, params={}) => {
-	const context = params;
+_render = (req, res, params) => {
+	// context is the dynamic data to use on the page
+	const context = params.data || {};
 	context.pageTitle = getPageTitle(params.template);
 	res.render(params.template,context);
+
 } //end render()
 
 

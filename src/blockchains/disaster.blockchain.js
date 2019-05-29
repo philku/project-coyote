@@ -91,9 +91,10 @@ DisasterBlockchain.prototype.getLastBlock = function() {
  **/
 
 
-DisasterBlockchain.prototype.createNewDisaster = function ({ latitude, longitude, city, state=null, country, type, description }) {
+DisasterBlockchain.prototype.createNewDisaster = function ({ isActive = true, latitude, longitude, city, state=null, country, type, description }) {
 	const newDisaster = {
 		disasterID: uuid().split('-').join(''),
+		isActive,
 		latitude,
 		longitude,
 		city,
