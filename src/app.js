@@ -55,17 +55,14 @@ let pageData = {}; // data that will be passed to the page to display
 
 
 /*** Index Page */
-
 app.get('/', (req,res) => {
 	index.render(req,res);
 });
 
 
 /********************* Disaster Routes */
-
-
 app.get('/disaster', (req,res) => {
-	disaster.render(req,res,pageData);
+	disaster.render(req,res,{});
 });
 
 app.get('/disasters?/list', (req,res) => {

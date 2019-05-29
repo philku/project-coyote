@@ -10,12 +10,11 @@
 const utils = require('./utils');
 
 function _render(req,res,pageConfig={}) {
-	console.log('pagedata: ', pageConfig);
 	let params = {
 		template: pageConfig.template || 'disaster',
+		pageTitle: pageConfig.pageTitle || '',
 		data: pageConfig.data || {}
 	};
-	console.log('pagedata/data: ', pageConfig.data);
 
 	utils.render(req,res,params);
 }
@@ -31,7 +30,6 @@ function disasterDetail({ req, res, disasterBlockchain }) {
 		let thisBlock = disasterBlockchain.chain[x];
 		thisBlock.disasters.forEach((disaster) => {
 			if(disaster.disasterID === disasterID) {
-				console.log('@@@@@@@@ located disaster: ', disaster);
 				disasterData = disaster;
 				found = true;
 			}
@@ -49,6 +47,7 @@ function disasterDetail({ req, res, disasterBlockchain }) {
 	}
 
 	pageConfig.data = data;
+	pageConfig.pageTitle = `${disasterData.city}, ${disasterData.country}`;
 	_render(req,res,pageConfig);
 }
 
@@ -67,6 +66,7 @@ function listDisasters({ req, res, disasterBlockchain }) {
 	}
 	const pageConfig = {
 		template: "disasterList",
+		pageTitle: "Current Natural Disaster List",
 		data: { disasters: disasters}
 	};
 	_render(req,res,pageConfig);
