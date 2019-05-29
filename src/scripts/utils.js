@@ -13,10 +13,12 @@
  *
  *
  **/
-_render = (req, res, params={}) => {
-	const context = params;
-	context.pageTitle = getPageTitle(params.template);
+_render = (req, res, params = {}) => {
+	// context is the dynamic data to use on the page
+	const context = params.data || {};
+	context.pageTitle = params.pageTitle || getPageTitle(params.template);
 	res.render(params.template,context);
+
 } //end render()
 
 
@@ -30,11 +32,17 @@ _render = (req, res, params={}) => {
  **/
 getPageTitle = template => {
 	let pageTitles = {
-		index: "Project Coyote",
-		"404":  "Project Coyote - Page Not Found"
+		"404":  "Page Not Found"
 	}
-	return pageTitles[template] || "Project Coyote";
-} // end _getPageTitle
+
+	let title = "Project Coyote";
+
+	if(pageTitles[template]) {
+		title = title + " | ${pageTitles[template]";
+	}
+
+	return title;
+} // end getPageTitle
 
 
 module.exports = {

@@ -1,9 +1,9 @@
 const utils = require('./utils');
 
-function _render(req,res,pageData={}) {
+function _render(req,res,pageConfig={}) {
 	let params = {
 		template: 'index',
-		pageData: pageData
+		data: {}
 	};
 	utils.render(req,res,params);
 }
