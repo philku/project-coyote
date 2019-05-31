@@ -69,6 +69,10 @@ app.get('/disasters?/list', (req,res) => {
 	disaster.listDisasters({ req, res, disasterBlockchain });
 });
 
+app.get('/disasters?/new', (req,res) => {
+	disaster.newDisaster({ req, res});
+});
+
 app.get('/disasters?/detail/:disasterID', (req,res) => {
 	disaster.disasterDetail({ req, res, disasterBlockchain });
 });
@@ -155,18 +159,21 @@ app.get('/api/blockchain/donor/details', (req,res) => {
 ///////////// Disater admin
 
 app.get('/api/blockchain/disaster/add', (req,res) => {
+
+	console.log("received data: ", req.query);
+
 	const disaster = {
-		latitude: "41N 17' 45\"",
-		longitude: "103W 22' 55\"",
-		city: "Nassau",
-		state: null,
-		country: "Bahamas",
-		type: "Hurricane",
-		description: "Category 5 hurricane."
-	}
+		latitude: req.query.latitude,
+		longitude: req.query.longitude,
+		city: req.query.city,
+		state: req.query.state,
+		country: req.query.country,
+		type: req.query.type,
+		description: req.query.description
+	};
 
 	disasterBlockchain.addDisasterToPendingDisasters(disasterBlockchain.createNewDisaster(disaster));
-	res.send('DIsaster added to pending disasters<br><br><a href="/disaster">Disaster Home</a>');
+	res.send('Disaster added to pending disasters<br><br><a href="/disaster">Disaster Home</a>');
 });
 
 

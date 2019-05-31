@@ -72,8 +72,18 @@ function listDisasters({ req, res, disasterBlockchain }) {
 	_render(req,res,pageConfig);
 } // end listDisasters()
 
+function newDisaster({ req, res}) {
+
+    const pageConfig = {
+        template: "disasterNew",
+        pageTitle: "New Disaster Form"
+    };
+    _render(req,res,pageConfig);
+} // end newDisaster()
+
 module.exports = {
 	render: _render,
 	listDisasters,
-	disasterDetail
+	disasterDetail,
+    newDisaster
 }
