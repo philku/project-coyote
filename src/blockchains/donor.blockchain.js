@@ -273,6 +273,28 @@ DonorBlockchain.prototype.getDonorData = function({ donorID }) {
 	}
 };
 
+/**
+ *
+ * function mine - mines the next block
+ *
+ *	@return {object} - The complete block that was added to the blockchain
+ *
+ **/
+DonorBlockchain.prototype.mine = function () {
+    const lastBlock = this.getLastBlock();
+    const previousBlockHash = lastBlock.hash;
+
+    // currentBlockData can take anything you want to put in here
+    const currentBlockData = {
+        disasters: this.pendingDisasters,
+        index: lastBlock.index + 1
+    };
+    const nonce = this.proofOfWork(previousBlockHash, currentBlockData);
+    const blockHash = this.hashBlock(nonce, previousBlockHash, currentBlockData);
+    const newBlock = this.createNewBlock(nonce, previousBlockHash, blockHash);
+
+    return newBlock;
+};
 
 
 //////////////////// below here needs reviewed for donor content

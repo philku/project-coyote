@@ -101,17 +101,7 @@ app.get('/api/blockchain/donor/add', (req,res) => {
 });
 
 app.get('/api/blockchain/donor/mine', (req,res) => {
-	const lastBlock = donorBlockchain.getLastBlock();
-	const previousBlockHash = lastBlock.hash;
-
-	// currentBlockData can take anything you want to put in here
-	const currentBlockData = {
-		donors: donorBlockchain.pendingDonors,
-		index: lastBlock.index + 1
-	};
-	const nonce = donorBlockchain.proofOfWork(previousBlockHash, currentBlockData);
-	const blockHash = donorBlockchain.hashBlock(nonce, previousBlockHash, currentBlockData);
-	const newBlock = donorBlockchain.createNewBlock(nonce, previousBlockHash, blockHash);
+	const newBlock = donorBlockchain.mine();
 
 	//console.log('block should be mined: ', donorBlockchain.chain);
 	console.log('donors in this block: ', newBlock);
@@ -197,6 +187,7 @@ app.get('/resource', (req,res) => {
 	resource.render(req,res,pageData);
 });
 
+// add
 app.get('/api/blockchain/resource/add', (req,res) => {
 	const resourceObject = {
 		title: "Bottled Water",
@@ -234,27 +225,13 @@ app.get('/api/blockchain/resource/add', (req,res) => {
 	res.send('Added 6 items to the pending resources queue.<br><a href="/resource">Resources main</a>');
 });
 
-
-
-
 // mine
 app.get('/api/blockchain/resource/mine', (req,res) => {
-	const lastBlock = resourceBlockchain.getLastBlock();
-	const previousBlockHash = lastBlock.hash;
-
-	// currentBlockData can take anything you want to put in here
-	const currentBlockData = {
-		resources: resourceBlockchain.pendingResources,
-		index: lastBlock.index + 1
-	};
-	const nonce = resourceBlockchain.proofOfWork(previousBlockHash, currentBlockData);
-	const blockHash = resourceBlockchain.hashBlock(nonce, previousBlockHash, currentBlockData);
-	const newBlock = resourceBlockchain.createNewBlock(nonce, previousBlockHash, blockHash);
+	const newBlock = resourceBlockchain.mine();
 
 	//console.log('block should be mined: ', donorBlockchain.chain);
 	console.log('resources in this block: ', newBlock);
 	res.send('Resource block mined.<br><A href="/resource">Resource page</a><br>');
-
 });
 
 // list
@@ -343,7 +320,7 @@ app.get('/api/blockchain/donor/mineDonations', (req,res) => {
 	};
 	const nonce = donationBlockchain.proofOfWork(previousBlockHash, currentBlockData);
 	const blockHash = donationBlockchain.hashBlock(nonce, previousBlockHash, currentBlockData);
-	const newBlock = donationBlockchain.createNewBlock(nonce, previousBlockHash, blockHash);
+	const newBlock = donationBlockchain.createNewBlock();
 
 	//console.log('block should be mined: ', donorBlockchain.chain);
 	console.log('donations in this block: ', newBlock);
