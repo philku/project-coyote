@@ -323,7 +323,7 @@ app.get('/api/blockchain/donation/mineDonations', (req,res) => {
 	};
 	const nonce = donationBlockchain.proofOfWork(previousBlockHash, currentBlockData);
 	const blockHash = donationBlockchain.hashBlock(nonce, previousBlockHash, currentBlockData);
-	const newBlock = donationBlockchain.createNewBlock();
+	const newBlock = donationBlockchain.createNewBlock(nonce, previousBlockHash, blockHash);
 
 	//console.log('block should be mined: ', donorBlockchain.chain);
 	console.log('donations in this block: ', newBlock);
