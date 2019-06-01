@@ -251,7 +251,7 @@ DonorBlockchain.prototype.getBlock = function(blockHash) {
  **/
  
 DonorBlockchain.prototype.getDonorData = function({ donorID }) {
-	const donorData = {};
+	let donorData = {};
 	let found = false;
 
 	for(let x=this.chain.length-1; x>0; x--) {
