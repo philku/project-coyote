@@ -178,17 +178,7 @@ app.get('/api/blockchain/disaster/add', (req,res) => {
 
 
 app.get('/api/blockchain/disaster/mine', (req,res) => {
-	const lastBlock = disasterBlockchain.getLastBlock();
-	const previousBlockHash = lastBlock.hash;
-
-	// currentBlockData can take anything you want to put in here
-	const currentBlockData = {
-		disasters: disasterBlockchain.pendingDisasters,
-		index: lastBlock.index + 1
-	};
-	const nonce = disasterBlockchain.proofOfWork(previousBlockHash, currentBlockData);
-	const blockHash = disasterBlockchain.hashBlock(nonce, previousBlockHash, currentBlockData);
-	const newBlock = disasterBlockchain.createNewBlock(nonce, previousBlockHash, blockHash);
+	const newBlock = disasterBlockchain.mine();
 
 	//console.log('block should be mined: ', donorBlockchain.chain);
 	console.log('disasters in this block: ', newBlock);
