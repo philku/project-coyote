@@ -50,17 +50,20 @@ const donation = require('./scripts/donation.controller');
 const errorPage = require('./scripts/errorPage.controller');
 
 
-// Other varables needed
+// Other variables needed
 let pageData = {}; // data that will be passed to the page to display
 
 
-/*** Index Page */
+/******************* Index Page */
 app.get('/', (req,res) => {
 	index.render(req,res);
 });
 
 
-/********************* Disaster Routes */
+
+/////////// ALl routes here need set up in their respective controllers
+/******************* Disaster Routes */
+// get page
 app.get('/disaster', (req,res) => {
 	disaster.render(req,res,{});
 });
@@ -78,13 +81,44 @@ app.get('/disasters?/detail/:disasterID', (req,res) => {
 });
 
 
-/////////// ALl routes here need set up in their respective controllers
+/** Disaster Admin */
+// add
+app.get('/api/blockchain/disaster/add', (req,res) => {
 
-/********************* Donor Routes */
+    console.log("received data: ", req.query);
+
+    const disaster = {
+        latitude: req.query.latitude,
+        longitude: req.query.longitude,
+        city: req.query.city,
+        state: req.query.state,
+        country: req.query.country,
+        type: req.query.type,
+        description: req.query.description
+    };
+
+    disasterBlockchain.addDisasterToPendingDisasters(disasterBlockchain.createNewDisaster(disaster));
+    res.send('Disaster added to pending disasters<br><br><a href="/disaster">Disaster Home</a>');
+});
+
+// mine
+app.get('/api/blockchain/disaster/mine', (req,res) => {
+    const newBlock = disasterBlockchain.mine();
+
+    //console.log('block should be mined: ', donorBlockchain.chain);
+    console.log('disasters in this block: ', newBlock);
+    res.send('Disaster block mined.<br><A href="/disaster">Disaster page</a><br>');
+});
+
+
+
+/******************* Donor Routes */
+// get page
 app.get('/donor', (req,res) => {
 	donor.render(req,res,pageData);
 });
 
+// add
 app.get('/api/blockchain/donor/add', (req,res) => {
 	// add donor to blockchain
 
@@ -100,6 +134,7 @@ app.get('/api/blockchain/donor/add', (req,res) => {
 	res.send('donor added to pending queue<br><a href="/donor">DOnor Page</a><br>');
 });
 
+// mine
 app.get('/api/blockchain/donor/mine', (req,res) => {
 	const newBlock = donorBlockchain.mine();
 
@@ -109,7 +144,7 @@ app.get('/api/blockchain/donor/mine', (req,res) => {
 
 });
 
-
+// list
 app.get('/api/blockchain/donor/list', (req,res) => {
 	// use blockchain to list donors
 	let IDs = [];
@@ -135,6 +170,7 @@ app.get('/api/blockchain/donor/list', (req,res) => {
 
 });
 
+// ???
 app.get('/api/blockchain/donor/details', (req,res) => {
 	// just list the details of the first donor in the blockchain for skeleton
 	let blockData = donorBlockchain.chain[1];
@@ -146,43 +182,9 @@ app.get('/api/blockchain/donor/details', (req,res) => {
 });
 
 
-///////////// Disater admin
-
-app.get('/api/blockchain/disaster/add', (req,res) => {
-
-	console.log("received data: ", req.query);
-
-	const disaster = {
-		latitude: req.query.latitude,
-		longitude: req.query.longitude,
-		city: req.query.city,
-		state: req.query.state,
-		country: req.query.country,
-		type: req.query.type,
-		description: req.query.description
-	};
-
-	disasterBlockchain.addDisasterToPendingDisasters(disasterBlockchain.createNewDisaster(disaster));
-	res.send('Disaster added to pending disasters<br><br><a href="/disaster">Disaster Home</a>');
-});
-
-
-app.get('/api/blockchain/disaster/mine', (req,res) => {
-	const newBlock = disasterBlockchain.mine();
-
-	//console.log('block should be mined: ', donorBlockchain.chain);
-	console.log('disasters in this block: ', newBlock);
-	res.send('Disaster block mined.<br><A href="/disaster">Disaster page</a><br>');
-
-});
-
-
-
-
-
-
 
 /******************* Resource Routes */
+// get page
 app.get('/resource', (req,res) => {
 	resource.render(req,res,pageData);
 });
@@ -261,14 +263,14 @@ app.get('/api/blockchain/resource/list', (req,res) => {
 
 
 
-
-
-/*********************** Donation Routes */
+/******************* Donation Routes */
+// get page
 app.get('/donation', (req,res) => {
 	donation.render(req,res,pageData);
 });
 
-app.get('/api/blockchain/donor/addDonation', (req,res) => {
+// add [TODO: change contents]
+app.get('/api/blockchain/donation/addDonation', (req,res) => {
 	// get donor info from donor #1
 	const donorBlockData = donorBlockchain.chain[1];
 	const donor = donorBlockData.donors[0];
@@ -308,7 +310,8 @@ app.get('/api/blockchain/donor/addDonation', (req,res) => {
 	res.send('added hardcoded resources from donor #1 to disaster #1<br><br><a href="/donor">Donor Home</a><br><br><a href="/donation">Donations Home</a>');
 });
 
-app.get('/api/blockchain/donor/mineDonations', (req,res) => {
+// mine [TODO: change contents]
+app.get('/api/blockchain/donation/mineDonations', (req,res) => {
 
 	const lastBlock = donationBlockchain.getLastBlock();
 	const previousBlockHash = lastBlock.hash;
@@ -327,7 +330,7 @@ app.get('/api/blockchain/donor/mineDonations', (req,res) => {
 	res.send('Donations block mined.<br><A href="/donor">Donor page</a><br><br><a href="/donation">Donations Home</a>');
 });
 
-
+// list
 app.get('/api/blockchain/donation/list', (req,res) => {
 	// list all donations
 	const donationBlock = donationBlockchain.chain[1];
@@ -349,7 +352,7 @@ app.get('/api/blockchain/donation/list', (req,res) => {
 
 
 
-/************* 404 error page */
+/******************* 404 error page */
 app.get('*', (req,res) => {
 	errorPage.render(req,res);
 });
