@@ -85,7 +85,7 @@ app.get('/disasters?/detail/:disasterID', (req,res) => {
 // add
 app.get('/api/blockchain/disaster/add', (req,res) => {
 
-    console.log("received data: ", req.query);
+    console.log("'/api/blockchain/disaster/add' received data: ", req.query);
 
     const disaster = {
         latitude: req.query.latitude,
@@ -114,20 +114,27 @@ app.get('/api/blockchain/disaster/mine', (req,res) => {
 
 /******************* Donor Routes */
 // get page
+// Donor Actions
 app.get('/donor', (req,res) => {
 	donor.render(req,res,pageData);
+});
+// New Donor form
+app.get('/donor/new', (req,res) => {
+    donor.newDonor({ req, res});
 });
 
 // add
 app.get('/api/blockchain/donor/add', (req,res) => {
 	// add donor to blockchain
 
+    console.log("'/api/blockchain/donor/add' received data: ", req.query);
+
 	// Hardcoded for now
 	const donorObject = {
-		email: "bdeemer@gmail.com",
-		fname: "Bob",
-		lname: "Deemer",
-		organization: "Project Coyote"
+		email: req.query.email,
+		fname: req.query.fname,
+		lname: req.query.lname,
+		organization: req.query.organization
 	};
 
 	donorBlockchain.addDonorToPendingDonors(donorBlockchain.createNewDonor(donorObject));
