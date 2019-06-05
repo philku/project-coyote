@@ -8,7 +8,7 @@
 
 
 const sha256 = require('sha256');
-const currentNodeURL = process.argv[3]
+const currentNodeURL = process.argv[3];
 const uuid = require('uuid/v1');
 
 
@@ -286,7 +286,7 @@ DonorBlockchain.prototype.mine = function () {
 
     // currentBlockData can take anything you want to put in here
     const currentBlockData = {
-        disasters: this.pendingDisasters,
+        donors: this.pendingDonors,
         index: lastBlock.index + 1
     };
     const nonce = this.proofOfWork(previousBlockHash, currentBlockData);

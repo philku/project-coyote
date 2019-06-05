@@ -64,22 +64,22 @@ app.get('/', (req,res) => {
 /////////// ALl routes here need set up in their respective controllers
 /******************* Disaster Routes */
 // get page
+// Disaster Actions
 app.get('/disaster', (req,res) => {
 	disaster.render(req,res,{});
 });
-
+// List Disasters
 app.get('/disasters?/list', (req,res) => {
 	disaster.listDisasters({ req, res, disasterBlockchain });
 });
-
+// New Disaster Form
 app.get('/disasters?/new', (req,res) => {
 	disaster.newDisaster({ req, res});
 });
-
+// Disaster Details
 app.get('/disasters?/detail/:disasterID', (req,res) => {
 	disaster.disasterDetail({ req, res, disasterBlockchain });
 });
-
 
 /** Disaster Admin */
 // add
@@ -118,11 +118,20 @@ app.get('/api/blockchain/disaster/mine', (req,res) => {
 app.get('/donor', (req,res) => {
 	donor.render(req,res,pageData);
 });
+// List Donors
+app.get('/donors?/list', (req,res) => {
+    donor.listDonors({ req, res, donorBlockchain });
+});
 // New Donor form
-app.get('/donor/new', (req,res) => {
+app.get('/donors?/new', (req,res) => {
     donor.newDonor({ req, res});
 });
+// Donor Details
+app.get('/donors?/detail/:donorID', (req,res) => {
+    donor.donorDetail({ req, res, donorBlockchain });
+});
 
+/** Donor Admin */
 // add
 app.get('/api/blockchain/donor/add', (req,res) => {
 	// add donor to blockchain
@@ -148,43 +157,6 @@ app.get('/api/blockchain/donor/mine', (req,res) => {
 	//console.log('block should be mined: ', donorBlockchain.chain);
 	console.log('donors in this block: ', newBlock);
 	res.send('Donor block mined.<br><A href="/donor">Donor page</a><br>');
-
-});
-
-// list
-app.get('/api/blockchain/donor/list', (req,res) => {
-	// use blockchain to list donors
-	let IDs = [];
-	let donors = [];
-
-	for(let x = donorBlockchain.chain.length-1;x>0;x--) {
-		thisBlock = donorBlockchain.chain[x];
-		thisBlock.donors.forEach((donor) => {
-			if(IDs.indexOf(donor.donorID) === -1) {
-				IDs.push(donor.donorID);
-				donors.push(donor);
-			}
-		});
-	}
-
-	let output = "";
-	donors.forEach((donor) => {
-		output += `${donor.fname} ${donor.lname} (ID: ${donor.donorID})<br>`;
-	});
-
-	res.send(`<b>donor list:</b><br>${output}<br><br><a href="/donor">Main donor page</a>`);
-	console.log('^^^^^ donor list: ', donors);
-
-});
-
-// ???
-app.get('/api/blockchain/donor/details', (req,res) => {
-	// just list the details of the first donor in the blockchain for skeleton
-	let blockData = donorBlockchain.chain[1];
-	let donor = blockData.donors[0];
-	console.log('donor details path (only first donor in blockchain is display for proof of concept): ', donor);
-
-	res.send(`Donor details: <br>fname: ${donor.fname}<br>last name: ${donor.lname}<br>org: ${donor.organization}<br>donor email: ${donor.email}<br>Donor ID: ${donor.donorID}<br><br><a href='/donor'>Donor home</a>`);
 
 });
 
