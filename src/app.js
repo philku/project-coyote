@@ -87,7 +87,8 @@ app.get('/api/blockchain/disaster/add', (req,res) => {
 
     console.log("'/api/blockchain/disaster/add' received data: ", req.query);
 
-    const disaster = {
+    // Create the new Disaster object
+    const newDisaster = disasterBlockchain.createNewDisaster({
         latitude: req.query.latitude,
         longitude: req.query.longitude,
         city: req.query.city,
@@ -95,10 +96,14 @@ app.get('/api/blockchain/disaster/add', (req,res) => {
         country: req.query.country,
         type: req.query.type,
         description: req.query.description
-    };
+    });
 
-    disasterBlockchain.addDisasterToPendingDisasters(disasterBlockchain.createNewDisaster(disaster));
-    res.send('Disaster added to pending disasters<br><br><a href="/disaster">Disaster Home</a>');
+    // Add the new Disaster to pending, then mine.
+    disasterBlockchain.addDisasterToPendingDisasters(newDisaster);
+    disasterBlockchain.mine();
+
+    // Redirect user (w/ 303) to the disaster detail page of the newly created disaster.
+    res.redirect(303, `/disaster/detail/${newDisaster.disasterID}`);
 });
 
 // mine
@@ -115,7 +120,7 @@ app.get('/api/blockchain/disaster/mine', (req,res) => {
 /******************* Donor Routes */
 // get page
 // Donor Actions
-app.get('/donor', (req,res) => {
+app.get('/donors?', (req,res) => {
 	donor.render(req,res,pageData);
 });
 // List Donors
@@ -138,16 +143,20 @@ app.get('/api/blockchain/donor/add', (req,res) => {
 
     console.log("'/api/blockchain/donor/add' received data: ", req.query);
 
-	// Hardcoded for now
-	const donorObject = {
-		email: req.query.email,
-		fname: req.query.fname,
-		lname: req.query.lname,
-		organization: req.query.organization
-	};
+    // Create the new Donor object
+	const newDonor = donorBlockchain.createNewDonor({
+        email: req.query.email,
+        fname: req.query.fname,
+        lname: req.query.lname,
+        organization: req.query.organization
+    });
 
-	donorBlockchain.addDonorToPendingDonors(donorBlockchain.createNewDonor(donorObject));
-	res.send('donor added to pending queue<br><a href="/donor">DOnor Page</a><br>');
+	// Add the new donor to pending, then mine.
+	donorBlockchain.addDonorToPendingDonors(newDonor);
+    donorBlockchain.mine();
+
+    // Redirect user (w/ 303) to the donor detail page of the newly created donor.
+	res.redirect(303, `/donor/detail/${newDonor.donorID}`);
 });
 
 // mine
