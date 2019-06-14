@@ -170,7 +170,6 @@ app.get('/api/blockchain/donor/mine', (req,res) => {
 });
 
 
-
 /******************* Resource Routes */
 // get page
 app.get('/resource', (req,res) => {
@@ -258,7 +257,7 @@ app.get('/donation', (req,res) => {
 });
 
 // add [TODO: change contents]
-app.get('/api/blockchain/donation/addDonation', (req,res) => {
+app.get('/donor/addDonation', (req,res) => {
 	// get donor info from donor #1
 	const donorBlockData = donorBlockchain.chain[1];
 	const donor = donorBlockData.donors[0];
@@ -299,7 +298,7 @@ app.get('/api/blockchain/donation/addDonation', (req,res) => {
 });
 
 // mine [TODO: change contents]
-app.get('/api/blockchain/donation/mineDonations', (req,res) => {
+app.get('/donor/mineDonations', (req,res) => {
 
 	const lastBlock = donationBlockchain.getLastBlock();
 	const previousBlockHash = lastBlock.hash;
