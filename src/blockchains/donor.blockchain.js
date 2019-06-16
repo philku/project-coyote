@@ -257,7 +257,7 @@ DonorBlockchain.prototype.getDonorData = function({ donorID }) {
 	for(let x=this.chain.length-1; x>0; x--) {
 		const theBlock = this.chain[x];
 		theBlock.donors.forEach((donor) => {
-			if(donors.donorID == donorID) {
+			if(donor.donorID == donorID) {
 				donorData = donor;
 				found = true;
 			}

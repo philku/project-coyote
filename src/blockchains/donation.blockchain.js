@@ -26,7 +26,7 @@ DonationBlockchain.prototype.createNewBlock = function(nonce, previousBlockHash,
 		previousBlockHash
 	};
 
-	this.pendingDonation = [];
+	this.pendingDonations = [];
 	this.chain.push(newBlock);
 	return newBlock;
 }; // end createNewBlock

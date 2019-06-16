@@ -272,7 +272,7 @@ app.get('/donations?/list', (req,res) => {
 
 // List all donated resouces for a given disaster
 app.get('/donations/list/:disasterID', (req,res) => {
-	donation.listDonations({ req, res, disasterBlockchain, resourceBlockchain, donationBlockchain, donationBlockchain});
+	donation.listDonations({ req, res, disasterBlockchain, resourceBlockchain, donationBlockchain, donorBlockchain});
 });
 
 /******************* 404 error page */

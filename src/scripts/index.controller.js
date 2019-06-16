@@ -91,16 +91,16 @@ function setupAll({req, res, disasterBlockchain, donorBlockchain, resourceBlockc
 	const resources = [
 		{
 			UNNumber: "UN-WATER-001",
-			Qty: 1000
+			quantity: 1000
 		},
 
 		{
 			UNNumber: "UN-FOOD-001",
-			Qty: 2000
+			quantity: 2000
 		},
 		{
 			UNNumber: "UN-CLOTHING-001",
-			Qty: 2500
+			quantity: 2500
 		}
 	];
 
