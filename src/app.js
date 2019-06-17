@@ -59,6 +59,10 @@ app.get('/', (req,res) => {
 	index.render(req,res);
 });
 
+app.get('/setup', (req, res) => {
+	index.setupAll({ req, res, disasterBlockchain, donorBlockchain, resourceBlockchain, donationBlockchain});
+	res.send('All set.  A disaster, donot, 6 resource, and one donation has been initialized.<br><br><a href="/">Home</a>');
+});
 
 
 /////////// ALl routes here need set up in their respective controllers
@@ -106,7 +110,7 @@ app.get('/api/blockchain/disaster/add', (req,res) => {
     res.redirect(303, `/disaster/detail/${newDisaster.disasterID}`);
 });
 
-// mine
+// mine - obsolete - mined automatically in the add function
 app.get('/api/blockchain/disaster/mine', (req,res) => {
     const newBlock = disasterBlockchain.mine();
 
@@ -159,7 +163,7 @@ app.get('/api/blockchain/donor/add', (req,res) => {
 	res.redirect(303, `/donor/detail/${newDonor.donorID}`);
 });
 
-// mine
+// mine - obsolete - mined automatically in the add function above
 app.get('/api/blockchain/donor/mine', (req,res) => {
 	const newBlock = donorBlockchain.mine();
 
@@ -176,76 +180,24 @@ app.get('/resource', (req,res) => {
 	resource.render(req,res,pageData);
 });
 
-// add
-app.get('/api/blockchain/resource/add', (req,res) => {
-	const resourceObject = {
-		title: "Bottled Water",
-		description: "16.9oz bottle of water",
-		UNNumber: "UN-WATER-001"
-	};
-
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
-
-	resourceObject.title = "Non Perishable Food";
-	resourceObject.description = "Any canned or non-perishable food item";
-	resourceObject.UNNumber = "UN-FOOD-001";
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
-
-	resourceObject.title = "Clothing";
-	resourceObject.description = "Gently used clothing";
-	resourceObject.UNNumber = "UN-CLOTHING-001";
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
-
-	resourceObject.title = "Shoes";
-	resourceObject.description = "Mens / Womens / Childrens shoes";
-	resourceObject.UNNumber = "UN-CLOTHING-002";
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
-
-	resourceObject.title = "Ibuprofen";
-	resourceObject.description = "200 Ibuprofen tablets";
-	resourceObject.UNNumber = "UN-MEDS-001";
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
-
-	resourceObject.title = "Bandages";
-	resourceObject.description = "Any bandages and size with adhesive";
-	resourceObject.UNNumber = "UN-MEDS-002";
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
-
-	res.send('Added 6 items to the pending resources queue.<br><a href="/resource">Resources main</a>');
+// list resouces
+app.get('/resources?/list', (req,res) => {
+	resource.listResources({ req, res, resourceBlockchain });
 });
 
-// mine
+
+// add
+app.get('/resource/addInitialResources', (req,res) => {
+	resource.addInitialResources({ req, res, resourceBlockchain });
+});
+
+// mine - obsolete - mined automatically in the add function
 app.get('/api/blockchain/resource/mine', (req,res) => {
 	const newBlock = resourceBlockchain.mine();
 
 	//console.log('block should be mined: ', donorBlockchain.chain);
 	console.log('resources in this block: ', newBlock);
 	res.send('Resource block mined.<br><A href="/resource">Resource page</a><br>');
-});
-
-// list
-app.get('/api/blockchain/resource/list', (req,res) => {
-	// use blockchain to list resources
-	let IDs = [];
-	let resources = [];
-
-	for(let x = resourceBlockchain.chain.length-1;x>0;x--) {
-		thisBlock = resourceBlockchain.chain[x];
-		thisBlock.resources.forEach((resource) => {
-			if(IDs.indexOf(resource.resourceID) === -1) {
-				IDs.push(resource.resourceID);
-				resources.push(resource);
-			}
-		});
-	}
-
-	let output = "";
-	console.log('resource array after looking: ', resources);
-	resources.forEach((resource) => {
-		output += `title: ${resource.title}<br> desc: ${resource.description}<br>UNNumber: ${resource.UNNumber}<br><br>`;
-	});
-
-	res.send(`<b>resource list:</b><br>${output}<br><br><a href="/resource">Main resource page</a>`);
 });
 
 
@@ -294,31 +246,12 @@ app.get('/donor/addDonation', (req,res) => {
 	}
 
 	donationBlockchain.addDonationToPendingDonations(donationBlockchain.createNewDonation(donationObject));
-	res.send('added hardcoded resources from donor #1 to disaster #1<br><br><a href="/donor">Donor Home</a><br><br><a href="/donation">Donations Home</a>');
-});
-
-// mine [TODO: change contents]
-app.get('/donor/mineDonations', (req,res) => {
-
-	const lastBlock = donationBlockchain.getLastBlock();
-	const previousBlockHash = lastBlock.hash;
-
-	// currentBlockData can take anything you want to put in here
-	const currentBlockData = {
-		donations: donationBlockchain.pendingDonations,
-		index: lastBlock.index + 1
-	};
-	const nonce = donationBlockchain.proofOfWork(previousBlockHash, currentBlockData);
-	const blockHash = donationBlockchain.hashBlock(nonce, previousBlockHash, currentBlockData);
-	const newBlock = donationBlockchain.createNewBlock(nonce, previousBlockHash, blockHash);
-
-	//console.log('block should be mined: ', donorBlockchain.chain);
-	console.log('donations in this block: ', newBlock);
-	res.send('Donations block mined.<br><A href="/donor">Donor page</a><br><br><a href="/donation">Donations Home</a>');
+	donationBlockchain.mine();
+	res.redirect(303, `/donations/list`);
 });
 
 // list
-app.get('/api/blockchain/donation/list', (req,res) => {
+app.get('/donations?/list', (req,res) => {
 	// list all donations
 	const donationBlock = donationBlockchain.chain[1];
 	const donations = donationBlock.donations;
@@ -337,7 +270,10 @@ app.get('/api/blockchain/donation/list', (req,res) => {
 	res.send(`<a href='/donation'>Donation Home</a><br><br>${output}`);
 });
 
-
+// List all donated resouces for a given disaster
+app.get('/donations/list/:disasterID', (req,res) => {
+	donation.listDonations({ req, res, disasterBlockchain, resourceBlockchain, donationBlockchain, donorBlockchain});
+});
 
 /******************* 404 error page */
 app.get('*', (req,res) => {
