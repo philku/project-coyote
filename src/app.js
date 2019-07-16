@@ -1,31 +1,32 @@
-// App setup - this is for end-user interaction
-
-// Node modules
+// App
+// Requires
 const express = require('express');
-const exphbs = require('express-handlebars');
+const app = express();
 const path = require('path');
+
+// Parse Requests
+app.use(express.json());
+app.use(express.urlencoded({
+    extended: true
+}));
+
+// Log Requests
+app.use((req,res,next)=>{
+    console.log('==========================');
+    console.log('______   Request   _______');
+    console.log('Method:', req.method);
+    console.log('Path:', req.path);
+    console.log('Body:', req.body);
+    console.log('Params:', req.params);
+    console.log('Query:', req.query);
+    console.log('==========================');
+
+	next();
+});
+
 
 // Server-side scripts
 const utils = require('./scripts/utils');
-
-
-const app = express();
-app.set('views', __dirname + '/views');
-app.set('view engine', 'html');
-
-
-// Set up static styles directory
-app.use(express.static(path.join(__dirname,'assets')));
-
-// register handlebars
-app.engine('html', exphbs( {
-	extname: '.html',
-	defaultView: 'index',
-	defaultLayout: 'main',
-	layoutsDir: __dirname + '/views/layouts',
-	partialsDir: __dirname + '/views/partials'
-}));
-
 
 // init various blockchains
 const DonorBlockchain = require('./blockchains/donor.blockchain');
@@ -45,295 +46,124 @@ const donationBlockchain = new DonationBlockchain();
 const index = require('./scripts/index.controller');
 const disaster = require('./scripts/disaster.controller');
 const donor = require('./scripts/donor.controller');
-const resource = require('./scripts/resource.controller');
 const donation = require('./scripts/donation.controller');
-const errorPage = require('./scripts/errorPage.controller');
+const resource = require('./scripts/resource.controller');
 
 
-// Other variables needed
-let pageData = {}; // data that will be passed to the page to display
+// Authenticate any further requests
+app.use((req,res,next)=>{
+    console.log('Authenticate request here...');
+    // TODO: Auth requests
 
-
-/******************* Index Page */
-app.get('/', (req,res) => {
-	index.render(req,res);
+    next();
 });
 
 
+// Routes
 
-/////////// ALl routes here need set up in their respective controllers
-/******************* Disaster Routes */
-// get page
-// Disaster Actions
+// General
+app.get('/setup', (req,res) => {
+    index.setupAll({ req, res, disasterBlockchain, donorBlockchain, resourceBlockchain, donationBlockchain});
+    res.send('done');
+});
+
+// Disaster Details
 app.get('/disaster', (req,res) => {
-	disaster.render(req,res,{});
+    disaster.disasterDetail(req,res,disasterBlockchain);
 });
 // List Disasters
-app.get('/disasters?/list', (req,res) => {
-	disaster.listDisasters({ req, res, disasterBlockchain });
+app.get('/disasters', (req,res) => {
+    disaster.listDisasters(req,res,disasterBlockchain);
 });
-// New Disaster Form
-app.get('/disasters?/new', (req,res) => {
-	disaster.newDisaster({ req, res});
+// Add New Disaster
+app.post('/disasters?/new', (req,res) => {
+    disaster.newDisaster(req,res,disasterBlockchain);
 });
-// Disaster Details
-app.get('/disasters?/detail/:disasterID', (req,res) => {
-	disaster.disasterDetail({ req, res, disasterBlockchain });
-});
-
-/** Disaster Admin */
-// add
-app.get('/api/blockchain/disaster/add', (req,res) => {
-
-    console.log("'/api/blockchain/disaster/add' received data: ", req.query);
-
-    const disaster = {
-        latitude: req.query.latitude,
-        longitude: req.query.longitude,
-        city: req.query.city,
-        state: req.query.state,
-        country: req.query.country,
-        type: req.query.type,
-        description: req.query.description
-    };
-
-    disasterBlockchain.addDisasterToPendingDisasters(disasterBlockchain.createNewDisaster(disaster));
-    res.send('Disaster added to pending disasters<br><br><a href="/disaster">Disaster Home</a>');
-});
-
-// mine
-app.get('/api/blockchain/disaster/mine', (req,res) => {
+// Mine Disaster Block
+app.get('/disasters?/mine', (req,res) => {
     const newBlock = disasterBlockchain.mine();
 
-    //console.log('block should be mined: ', donorBlockchain.chain);
     console.log('disasters in this block: ', newBlock);
-    res.send('Disaster block mined.<br><A href="/disaster">Disaster page</a><br>');
+    res.send('disasters in this block: ', newBlock);
 });
 
 
-
-/******************* Donor Routes */
-// get page
-// Donor Actions
+// Donor Details
 app.get('/donor', (req,res) => {
-	donor.render(req,res,pageData);
+	donor.donorDetail(req,res,donorBlockchain);
 });
 // List Donors
-app.get('/donors?/list', (req,res) => {
-    donor.listDonors({ req, res, donorBlockchain });
+app.get('/donors', (req,res) => {
+    donor.listDonors(req,res,donorBlockchain);
 });
-// New Donor form
-app.get('/donors?/new', (req,res) => {
-    donor.newDonor({ req, res});
+// New Donor
+app.post('/donors?/new', (req,res) => {
+    donor.newDonor(req,res,donorBlockchain);
 });
-// Donor Details
-app.get('/donors?/detail/:donorID', (req,res) => {
-    donor.donorDetail({ req, res, donorBlockchain });
-});
-
-/** Donor Admin */
-// add
-app.get('/api/blockchain/donor/add', (req,res) => {
-	// add donor to blockchain
-
-    console.log("'/api/blockchain/donor/add' received data: ", req.query);
-
-	// Hardcoded for now
-	const donorObject = {
-		email: req.query.email,
-		fname: req.query.fname,
-		lname: req.query.lname,
-		organization: req.query.organization
-	};
-
-	donorBlockchain.addDonorToPendingDonors(donorBlockchain.createNewDonor(donorObject));
-	res.send('donor added to pending queue<br><a href="/donor">DOnor Page</a><br>');
-});
-
-// mine
-app.get('/api/blockchain/donor/mine', (req,res) => {
+// Mine Donor Block
+app.get('/donors?/mine', (req,res) => {
 	const newBlock = donorBlockchain.mine();
 
-	//console.log('block should be mined: ', donorBlockchain.chain);
 	console.log('donors in this block: ', newBlock);
-	res.send('Donor block mined.<br><A href="/donor">Donor page</a><br>');
+	res.send('donors in this block: ', newBlock);
 
 });
 
 
-
-/******************* Resource Routes */
-// get page
+// Resource Details
 app.get('/resource', (req,res) => {
-	resource.render(req,res,pageData);
+	resource.resourceDetail(req,res,resourceBlockchain);
 });
-
-// add
-app.get('/api/blockchain/resource/add', (req,res) => {
-	const resourceObject = {
-		title: "Bottled Water",
-		description: "16.9oz bottle of water",
-		UNNumber: "UN-WATER-001"
-	};
-
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
-
-	resourceObject.title = "Non Perishable Food";
-	resourceObject.description = "Any canned or non-perishable food item";
-	resourceObject.UNNumber = "UN-FOOD-001";
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
-
-	resourceObject.title = "Clothing";
-	resourceObject.description = "Gently used clothing";
-	resourceObject.UNNumber = "UN-CLOTHING-001";
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
-
-	resourceObject.title = "Shoes";
-	resourceObject.description = "Mens / Womens / Childrens shoes";
-	resourceObject.UNNumber = "UN-CLOTHING-002";
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
-
-	resourceObject.title = "Ibuprofen";
-	resourceObject.description = "200 Ibuprofen tablets";
-	resourceObject.UNNumber = "UN-MEDS-001";
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
-
-	resourceObject.title = "Bandages";
-	resourceObject.description = "Any bandages and size with adhesive";
-	resourceObject.UNNumber = "UN-MEDS-002";
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
-
-	res.send('Added 6 items to the pending resources queue.<br><a href="/resource">Resources main</a>');
+// Resource Details
+app.get('/resources', (req,res) => {
+    resource.listResources(req,res,resourceBlockchain);
 });
-
-// mine
-app.get('/api/blockchain/resource/mine', (req,res) => {
-	const newBlock = resourceBlockchain.mine();
-
-	//console.log('block should be mined: ', donorBlockchain.chain);
-	console.log('resources in this block: ', newBlock);
-	res.send('Resource block mined.<br><A href="/resource">Resource page</a><br>');
+// New Resource
+app.post('/resources?/new', (req,res) => {
+    resource.newResource(req,res,resourceBlockchain);
 });
+// Mine Resource Block
+app.get('/resources?/mine', (req,res) => {
+    const newBlock = resourceBlockchain.mine();
 
-// list
-app.get('/api/blockchain/resource/list', (req,res) => {
-	// use blockchain to list resources
-	let IDs = [];
-	let resources = [];
+    console.log('resources in this block: ', newBlock);
+    res.send('resources in this block: ', newBlock);
 
-	for(let x = resourceBlockchain.chain.length-1;x>0;x--) {
-		thisBlock = resourceBlockchain.chain[x];
-		thisBlock.resources.forEach((resource) => {
-			if(IDs.indexOf(resource.resourceID) === -1) {
-				IDs.push(resource.resourceID);
-				resources.push(resource);
-			}
-		});
-	}
-
-	let output = "";
-	console.log('resource array after looking: ', resources);
-	resources.forEach((resource) => {
-		output += `title: ${resource.title}<br> desc: ${resource.description}<br>UNNumber: ${resource.UNNumber}<br><br>`;
-	});
-
-	res.send(`<b>resource list:</b><br>${output}<br><br><a href="/resource">Main resource page</a>`);
+});
+// Mine Resource Block
+app.get('/resources?/addInitial', (req,res) => {
+    resource.addInitialResources(req,res,resourceBlockchain);
 });
 
 
-
-/******************* Donation Routes */
-// get page
+// Donation Details
 app.get('/donation', (req,res) => {
-	donation.render(req,res,pageData);
+    donation.donationDetail(req,res,donationBlockchain);
 });
-
-// add [TODO: change contents]
-app.get('/api/blockchain/donation/addDonation', (req,res) => {
-	// get donor info from donor #1
-	const donorBlockData = donorBlockchain.chain[1];
-	const donor = donorBlockData.donors[0];
-
-	// get disaster info from disaster #1
-	const disasterBlockData = disasterBlockchain.chain[1];
-	const disaster = disasterBlockData.disasters[0];
-
-
-	const resources = [
-		{
-			UNNumber: "UN-WATER-001",
-			Qty: 1000
-		},
-
-		{
-			UNNumber: "UN-FOOD-001",
-			Qty: 2000
-		},
-		{
-			UNNumber: "UN-CLOTHING-001",
-			Qty: 2500
-		}
-	];
-
-
-	const donationObject = {
-		dateTime: new Date(),
-		disasterID: disaster.disasterID,
-		donorID: donor.donorID,
-		resources: resources,
-		sendDate: null,
-		arriveDate: null
-	}
-
-	donationBlockchain.addDonationToPendingDonations(donationBlockchain.createNewDonation(donationObject));
-	res.send('added hardcoded resources from donor #1 to disaster #1<br><br><a href="/donor">Donor Home</a><br><br><a href="/donation">Donations Home</a>');
+// List Donations
+app.get('/donations', (req,res) => {
+    donation.listDonations(req,res,donationBlockchain,resourceBlockchain,donorBlockchain,disasterBlockchain);
 });
-
-// mine [TODO: change contents]
-app.get('/api/blockchain/donation/mineDonations', (req,res) => {
-
-	const lastBlock = donationBlockchain.getLastBlock();
-	const previousBlockHash = lastBlock.hash;
-
-	// currentBlockData can take anything you want to put in here
-	const currentBlockData = {
-		donations: donationBlockchain.pendingDonations,
-		index: lastBlock.index + 1
-	};
-	const nonce = donationBlockchain.proofOfWork(previousBlockHash, currentBlockData);
-	const blockHash = donationBlockchain.hashBlock(nonce, previousBlockHash, currentBlockData);
-	const newBlock = donationBlockchain.createNewBlock(nonce, previousBlockHash, blockHash);
-
-	//console.log('block should be mined: ', donorBlockchain.chain);
-	console.log('donations in this block: ', newBlock);
-	res.send('Donations block mined.<br><A href="/donor">Donor page</a><br><br><a href="/donation">Donations Home</a>');
+// New Donation
+app.post('/donations?/new', (req,res) => {
+    donation.newDonation(req,res,donationBlockchain);
 });
+// Mine Donation Block
+app.get('/donations?/mine', (req,res) => {
+    const newBlock = donationBlockchain.mine();
 
-// list
-app.get('/api/blockchain/donation/list', (req,res) => {
-	// list all donations
-	const donationBlock = donationBlockchain.chain[1];
-	const donations = donationBlock.donations;
+    console.log('donations in this block: ', newBlock);
+    res.send('donations in this block: ', newBlock);
 
-	let output = "";
-
-	donations.forEach((donation) =>{
-		output += `(Disaster ID: ${donation.disasterID}<br>DOnor ID: ${donation.donorID}<br>Resources:<br>`;
-		
-		donation.resources.forEach((resource) => {
-			output += `Quantity: ${resource.Qty} / UN Part number: ${resource.UNNumber}<br>`;
-		});
-		output += "<br><br>";
-	});
-
-	res.send(`<a href='/donation'>Donation Home</a><br><br>${output}`);
 });
 
 
-
-/******************* 404 error page */
+// Other
 app.get('*', (req,res) => {
-	errorPage.render(req,res);
+	res.status(404).send(Error('Invalid request'));
+});
+app.post('*', (req,res) => {
+	res.status(404).send(Error('Invalid request'));
 });
 
 

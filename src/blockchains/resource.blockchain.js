@@ -233,6 +233,29 @@ ResourceBlockchain.prototype.getResourceData = function({ resourceID }) {
 	}
 };
 
+ResourceBlockchain.prototype.getResourceDataByNumber = function(paramKey,paramVal) {
+	let resourceData = {};
+	let found = false;
+
+	for(let x=this.chain.length-1; x>0; x--) {
+		const theBlock = this.chain[x];
+		theBlock.resources.forEach((resource) => {
+			if(resource[paramKey] == paramVal) {
+				resourceData = resource;
+				found = true;
+			}
+		});
+
+		if(found) {
+			break;
+		}
+	}
+
+	return {
+		resourceData
+	}
+};
+
 /**
  *
  * function mine - mines the next block

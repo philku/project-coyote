@@ -1,23 +1,12 @@
 const utils = require('./utils');
 
-function _render(req,res,pageConfig={}) {
-	console.log('^^^^ rendering donor');
-	let params = {
-        template: pageConfig.template || 'donor',
-        pageTitle: pageConfig.pageTitle || '',
-        data: pageConfig.data || {}
-	};
-	utils.render(req,res,params);
-}
-
-function donorDetail({ req, res, donorBlockchain }) {
-    const donorID = req.params.donorID;
+function donorDetail(req, res, donorBlockchain) {
+    const donorID = req.query.donorID;
 
     let donorData = {};
     let found = false;
-    let pageConfig = {};
 
-    for(let x = donorBlockchain.chain.length-1;x>0; x--) {
+    for(let x = donorBlockchain.chain.length - 1;x>0; x--) {
         let thisBlock = donorBlockchain.chain[x];
         thisBlock.donors.forEach((donor) => {
             if(donor.donorID === donorID) {
@@ -30,8 +19,6 @@ function donorDetail({ req, res, donorBlockchain }) {
         }
     }
 
-    pageConfig.template = 'donorDetails';
-
     let data = {};
     if(found) {
         data = {donorData};
@@ -39,12 +26,10 @@ function donorDetail({ req, res, donorBlockchain }) {
         data = {donorData: {error: "Donor Not Found"}};
     }
 
-    pageConfig.data = data;
-    pageConfig.pageTitle = `${donorData.city}, ${donorData.country}`;
-    _render(req,res,pageConfig);
+    res.send(data);
 }
 
-function listDonors({ req, res, donorBlockchain }) {
+function listDonors(req, res, donorBlockchain) {
     let IDs = [];
     let donors = [];
 
@@ -58,27 +43,28 @@ function listDonors({ req, res, donorBlockchain }) {
             }
         });
     }
-    const pageConfig = {
-        template: "donorList",
-        pageTitle: "Current Donor List",
-        data: { donors: donors}
-    };
-    _render(req,res,pageConfig);
+
+    res.send(donors);
 } // end listDonors()
 
-function newDonor({ req, res}) {
+function newDonor(req, res, donorBlockchain){
 
-    const pageConfig = {
-        template: "donorNew",
-        pageTitle: "New Donor Form"
+    // Hardcoded for now
+    const donorObject = {
+        email: req.body.email,
+        fname: req.body.fname,
+        lname: req.body.lname,
+        organization: req.body.organization
     };
 
-    _render(req,res,pageConfig);
+    let newDonorObj = donorBlockchain.createNewDonor(donorObject);
+    donorBlockchain.addDonorToPendingDonors(newDonorObj);
+    donorBlockchain.mine();
+    res.send(newDonorObj.donorID);
 } // end newDonor()
 
 
 module.exports = {
-	render: _render,
     listDonors,
     donorDetail,
 	newDonor
