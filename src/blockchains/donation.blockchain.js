@@ -26,7 +26,7 @@ DonationBlockchain.prototype.createNewBlock = function(nonce, previousBlockHash,
 		previousBlockHash
 	};
 
-	this.pendingDonation = [];
+	this.pendingDonations = [];
 	this.chain.push(newBlock);
 	return newBlock;
 }; // end createNewBlock
@@ -128,6 +128,30 @@ DonationBlockchain.prototype.getBlock = function(blockHash) {
 
 	return correctBlock;
 };
+
+/**
+ *
+ * function mine - mines the next block
+ *
+ *	@return {object} - The complete block that was added to the blockchain
+ *
+ **/
+DonationBlockchain.prototype.mine = function () {
+    const lastBlock = this.getLastBlock();
+    const previousBlockHash = lastBlock.hash;
+
+    // currentBlockData can take anything you want to put in here
+    const currentBlockData = {
+        donations: this.pendingDonations,
+        index: lastBlock.index + 1
+    };
+    const nonce = this.proofOfWork(previousBlockHash, currentBlockData);
+    const blockHash = this.hashBlock(nonce, previousBlockHash, currentBlockData);
+    const newBlock = this.createNewBlock(nonce, previousBlockHash, blockHash);
+
+    return newBlock;
+};
+
 
 DonationBlockchain.prototype.getDonation = function(donationID) {
 	// get a block with a certain blockHash and return it
