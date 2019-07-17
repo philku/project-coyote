@@ -139,6 +139,8 @@ ResourceBlockchain.prototype.proofOfWork = function(previousBlockHash, currentBl
 		hash = this.hashBlock(nonce, previousBlockHash,currentBlockData);
 	}
 
+	//console.log(`${nonce}::${hash}`);
+
 	return nonce;
 }; // end proofOfWork
 
@@ -207,8 +209,8 @@ ResourceBlockchain.prototype.getBlock = function(blockHash) {
 	return correctBlock;
 };
 
-
-ResourceBlockchain.prototype.getResourceDataByID = function( resourceID ) {
+ 
+ResourceBlockchain.prototype.getResourceData = function({ resourceID }) {
 	let resourceData = {};
 	let found = false;
 
@@ -226,17 +228,19 @@ ResourceBlockchain.prototype.getResourceDataByID = function( resourceID ) {
 		}
 	}
 
-	return resourceData;
+	return {
+		resourceData
+	}
 };
 
-ResourceBlockchain.prototype.getResourceDataByNumber = function( resourceNumber ) {
+ResourceBlockchain.prototype.getResourceDataByNumber = function(paramKey,paramVal) {
 	let resourceData = {};
 	let found = false;
 
 	for(let x=this.chain.length-1; x>0; x--) {
 		const theBlock = this.chain[x];
 		theBlock.resources.forEach((resource) => {
-			if(resource.UNNumber == resourceNumber) {
+			if(resource[paramKey] == paramVal) {
 				resourceData = resource;
 				found = true;
 			}
@@ -247,9 +251,10 @@ ResourceBlockchain.prototype.getResourceDataByNumber = function( resourceNumber 
 		}
 	}
 
-	return resourceData;
+	return {
+		resourceData
+	}
 };
-
 
 /**
  *

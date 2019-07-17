@@ -257,7 +257,7 @@ DonorBlockchain.prototype.getDonorData = function({ donorID }) {
 	for(let x=this.chain.length-1; x>0; x--) {
 		const theBlock = this.chain[x];
 		theBlock.donors.forEach((donor) => {
-			if(donor.donorID == donorID) {
+			if(donorData.donorID == donorID) {
 				donorData = donor;
 				found = true;
 			}
@@ -291,9 +291,7 @@ DonorBlockchain.prototype.mine = function () {
     };
     const nonce = this.proofOfWork(previousBlockHash, currentBlockData);
     const blockHash = this.hashBlock(nonce, previousBlockHash, currentBlockData);
-    const newBlock = this.createNewBlock(nonce, previousBlockHash, blockHash);
-
-    return newBlock;
+    return this.createNewBlock(nonce, previousBlockHash, blockHash);
 };
 
 

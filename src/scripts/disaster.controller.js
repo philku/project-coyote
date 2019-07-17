@@ -19,12 +19,11 @@ function _render(req,res,pageConfig={}) {
 	utils.render(req,res,params);
 }
 
-function disasterDetail({ req, res, disasterBlockchain }) {
-	const disasterID = req.params.disasterID;
+function disasterDetail(req, res, disasterBlockchain) {
+	const disasterID = req.query.disasterID;
 
 	let disasterData = {};
 	let found = false;
-	let pageConfig = {};
 
 	for(let x = disasterBlockchain.chain.length-1;x>0; x--) {
 		let thisBlock = disasterBlockchain.chain[x];
@@ -39,22 +38,21 @@ function disasterDetail({ req, res, disasterBlockchain }) {
 		}
 	}
 
-	pageConfig.template = 'disasterDetails';
+	let data = {};
 	if(found) {
 		data = {disasterData};
 	} else {
 		data = {disasterData: {error: "Disaster Not Found"}};
 	}
 
-	pageConfig.data = data;
-	pageConfig.pageTitle = `${disasterData.city}, ${disasterData.country}`;
-	_render(req,res,pageConfig);
+    res.send(data);
 }
 
-function listDisasters({ req, res, disasterBlockchain }) {
+function listDisasters(req, res, disasterBlockchain) {
 	let IDs = [];
 	let disasters = [];
 
+    let thisBlock = {};
 	for(let x = disasterBlockchain.chain.length-1;x>0;x--) {
 		thisBlock = disasterBlockchain.chain[x];
 		thisBlock.disasters.forEach((disaster) => {
@@ -64,21 +62,26 @@ function listDisasters({ req, res, disasterBlockchain }) {
 			}
 		});
 	}
-	const pageConfig = {
-		template: "disasterList",
-		pageTitle: "Current Natural Disaster List",
-		data: { disasters: disasters}
-	};
-	_render(req,res,pageConfig);
+
+    res.send(disasters);
 } // end listDisasters()
 
-function newDisaster({ req, res}) {
+function newDisaster(req, res, disasterBlockchain) {
 
-    const pageConfig = {
-        template: "disasterNew",
-        pageTitle: "New Disaster Form"
+    const disaster = {
+        latitude: req.body.latitude,
+        longitude: req.body.longitude,
+        city: req.body.city,
+        state: req.body.state,
+        country: req.body.country,
+        type: req.body.type,
+        description: req.body.description
     };
-    _render(req,res,pageConfig);
+
+    let newDisasterObj = disasterBlockchain.createNewDisaster(disaster);
+    disasterBlockchain.addDisasterToPendingDisasters(newDisasterObj);
+    disasterBlockchain.mine();
+    res.send(newDisasterObj.disasterID);
 } // end newDisaster()
 
 module.exports = {
@@ -86,4 +89,4 @@ module.exports = {
 	listDisasters,
 	disasterDetail,
     newDisaster
-}
+};

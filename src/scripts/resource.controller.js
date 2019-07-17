@@ -1,76 +1,110 @@
 const utils = require('./utils');
 
-function _render(req,res,pageData={}) {
-	let params = {
-		template: 'resource',
-		pageData: pageData
-	};
-	utils.render(req,res,params);
+function resourceDetail(req, res, resourceBlockchain) {
+    const resourceID = req.query.resourceID;
+
+    let resourceData = {};
+    let found = false;
+
+    for(let x = resourceBlockchain.chain.length - 1;x>0; x--) {
+        let thisBlock = resourceBlockchain.chain[x];
+        thisBlock.resources.forEach((resource) => {
+            if(resource.resourceID === resourceID) {
+                resourceData = resource;
+                found = true;
+            }
+        });
+        if(found) {
+            break;
+        }
+    }
+
+    let data = {};
+    if(found) {
+        data = {resourceData};
+    } else {
+        data = {resourceData: {error: "Resource Not Found"}};
+    }
+
+    res.send(data);
 }
 
-function listResources({ req, res, resourceBlockchain}) {
-	let IDs = [];
-	let resources = [];
+function listResources(req, res, resourceBlockchain) {
+    let IDs = [];
+    let resources = [];
 
-	for(let x = resourceBlockchain.chain.length-1;x>0;x--) {
-		thisBlock = resourceBlockchain.chain[x];
-		thisBlock.resources.forEach((resource) => {
-			if(IDs.indexOf(resource.resourceID) === -1) {
-				IDs.push(resource.resourceID);
-				resources.push(resource);
-			}
-		});
-	}
+    let thisBlock = {};
+    for(let x = resourceBlockchain.chain.length-1;x>0;x--) {
+        thisBlock = resourceBlockchain.chain[x];
+        thisBlock.resources.forEach((resource) => {
+            if(IDs.indexOf(resource.resourceID) === -1) {
+                IDs.push(resource.resourceID);
+                resources.push(resource);
+            }
+        });
+    }
 
-	let output = "";
-	resources.forEach((resource) => {
-		output += `title: ${resource.title}<br> desc: ${resource.description}<br>UNNumber: ${resource.UNNumber}<br><br>`;
-	});
-	res.send(`<b>resource list::</b><br>${output}<br><br><a href="/resource">Main resource page</a>`);
-}
+    res.send(resources);
+} // end listResources()
 
-function addInitialResources({ req, res, resourceBlockchain }) {
-	const resourceObject = {
-		title: "Bottled Water",
-		description: "16.9oz bottle of water",
-		UNNumber: "UN-WATER-001"
-	};
+function newResource(req, res, resourceBlockchain){
 
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
+    // Hardcoded for now
+    const resourceObject = {
+        name: req.body.name,
+        description: req.body.description,
+        nsn: req.body.nsn,
+        quantity: req.body.quantity
+    };
 
-	resourceObject.title = "Non Perishable Food";
-	resourceObject.description = "Any canned or non-perishable food item";
-	resourceObject.UNNumber = "UN-FOOD-001";
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
+    let newResourceObj = resourceBlockchain.createNewResource(resourceObject);
+    resourceBlockchain.addResourceToPendingResources(newResourceObj);
+    resourceBlockchain.mine();
+    res.send(newResourceObj.resourceID);
+} // end newResource()
 
-	resourceObject.title = "Clothing";
-	resourceObject.description = "Gently used clothing";
-	resourceObject.UNNumber = "UN-CLOTHING-001";
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
+function addInitialResources(req, res, resourceBlockchain) {
+    const resourceObject = {
+        title: "Bottled Water",
+        description: "16.9oz bottle of water",
+        nsn: "UN-WATER-001"
+    };
 
-	resourceObject.title = "Shoes";
-	resourceObject.description = "Mens / Womens / Childrens shoes";
-	resourceObject.UNNumber = "UN-CLOTHING-002";
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
+    resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
 
-	resourceObject.title = "Ibuprofen";
-	resourceObject.description = "200 Ibuprofen tablets";
-	resourceObject.UNNumber = "UN-MEDS-001";
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
+    resourceObject.title = "Non Perishable Food";
+    resourceObject.description = "Any canned or non-perishable food item";
+    resourceObject.nsn = "UN-FOOD-001";
+    resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
 
-	resourceObject.title = "Bandages";
-	resourceObject.description = "Any bandages and size with adhesive";
-	resourceObject.UNNumber = "UN-MEDS-002";
-	resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
+    resourceObject.title = "Clothing";
+    resourceObject.description = "Gently used clothing";
+    resourceObject.nsn = "UN-CLOTHING-001";
+    resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
 
-	resourceBlockchain.mine();
+    resourceObject.title = "Shoes";
+    resourceObject.description = "Mens / Womens / Childrens shoes";
+    resourceObject.nsn = "UN-CLOTHING-002";
+    resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
 
-    // Redirect user (w/ 303) to the donor detail page of the newly created donor.
-	res.redirect(303, `/resources/list`);
+    resourceObject.title = "Ibuprofen";
+    resourceObject.description = "200 Ibuprofen tablets";
+    resourceObject.nsn = "UN-MEDS-001";
+    resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
+
+    resourceObject.title = "Bandages";
+    resourceObject.description = "Any bandages and size with adhesive";
+    resourceObject.nsn = "UN-MEDS-002";
+    resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource(resourceObject));
+
+    resourceBlockchain.mine();
+
+    res.send('done');
 } // end addInitialResources()
 
 module.exports = {
-	render: _render,
-	listResources,
-	addInitialResources
-}
+    listResources,
+    resourceDetail,
+	newResource,
+    addInitialResources
+};
