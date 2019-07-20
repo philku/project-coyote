@@ -26,6 +26,8 @@ function donorDetail(req, res, donorBlockchain) {
         data = {donorData: {error: "Donor Not Found"}};
     }
 
+    console.log(data);
+
     res.send(data);
 }
 
@@ -51,10 +53,12 @@ function newDonor(req, res, donorBlockchain){
 
     // Hardcoded for now
     const donorObject = {
+        wallet_id: req.body.wallet_id,
         email: req.body.email,
         fname: req.body.fname,
         lname: req.body.lname,
-        organization: req.body.organization
+        name: req.body.name,
+        type: req.body.type     // "org" or "user"
     };
 
     let newDonorObj = donorBlockchain.createNewDonor(donorObject);
