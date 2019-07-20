@@ -81,7 +81,9 @@ DonorBlockchain.prototype.getLastBlock = function() {
  *	@param {string} email - The email of the donor
  *	@param {string} fname - The first name of the donor
  *	@param {string} lname - The last name of the donor
- *	@param {string} organization - the organization that the donor is associated with
+ *	@param {string} name - The name of the organization
+ *  @param {string} wallet_id - the id associated with the user's wallet
+ *  @param {string} type - 'org' or 'user' signifying if this is an individual user or an organization
  *
  *	@return {object} - A donor object that can be used in the blockchain
  *
@@ -89,13 +91,15 @@ DonorBlockchain.prototype.getLastBlock = function() {
  **/
 
 
-DonorBlockchain.prototype.createNewDonor = function ({ email, fname, lname, organization }) {
+DonorBlockchain.prototype.createNewDonor = function ({ email, fname, lname, organization, name, wallet_id, type }) {
 	const newDonor = {
 		donorID: uuid().split('-').join(''),
 		email: email,
 		fname: fname,
 		lname: lname,
-		organization: organization
+		name: name,
+		wallet_id: wallet_id,
+		type: type
 	};
 	return newDonor;
 }; // end createNewDonor()
