@@ -57,7 +57,7 @@ class DonationBlockchain{
      * @param {date} arriveDate
      * @returns {{donationID: string, dateTime: date, disasterID: string, donorID: string, resources: array, sendDate: string, arriveDate: string}}
      */
-    static createNewDonation({ dateTime, disasterID, donorID, resources, sendDate, arriveDate }){
+    createNewDonation({ dateTime, disasterID, donorID, resources, sendDate, arriveDate }){
 
         return{
             donationID: uuid().split('-').join(''),
@@ -87,7 +87,7 @@ class DonationBlockchain{
      * @param {object} currentBlockData - an object containing a donation object as creates in the createNewDonation method
      * @returns {string} - The sha256 of this data.
      */
-    static hashBlock(nonce, previousBlockHash, currentBlockData){
+    hashBlock(nonce, previousBlockHash, currentBlockData){
         // concat the previousBlockHash, the currentBlock Data, and the nonce to ensure uniqueness.
         const data = previousBlockHash + nonce.toString() + JSON.stringify(currentBlockData);
         return sha256(data);

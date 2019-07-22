@@ -57,7 +57,7 @@ class DonorBlockchain{
      * @param {string} type
      * @returns {{donorID: string, email: string, fname: string, lname: string, name: string, wallet_id: string, type: string}}
      */
-    static createNewDonor({ email, fname, lname, name, wallet_id, type }) {
+    createNewDonor({ email, fname, lname, name, wallet_id, type }) {
         return{
             donorID: uuid().split('-').join(''),
             email: email,
@@ -87,7 +87,7 @@ class DonorBlockchain{
      * @param {object} currentBlockData - an object containing a donor object as creates in the createNewDonor method
      * @returns {string} - The sha256 of this data.
      */
-    static hashBlock(nonce, previousBlockHash, currentBlockData){
+    hashBlock(nonce, previousBlockHash, currentBlockData){
         // concat the previousBlockHash, the currentBlock Data, and the nonce to ensure uniqueness.
         const data = previousBlockHash + nonce.toString() + JSON.stringify(currentBlockData);
         return sha256(data);

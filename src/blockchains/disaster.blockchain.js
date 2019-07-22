@@ -59,7 +59,7 @@ class DisasterBlockchain{
      * @param {string} description - Freeform notes about the disaster
      * @returns {{disasterID: string, isActive: boolean, latitude: *, longitude: *, city: *, state: *, country: *, type: *, description: *}} - A donor object that can be used in the blockchain
      */
-    static createNewDisaster({ isActive = true, latitude, longitude, city, state=null, country, type, description }) {
+    createNewDisaster({ isActive = true, latitude, longitude, city, state=null, country, type, description }) {
         return{
             disasterID: uuid().split('-').join(''),
             isActive,
@@ -90,7 +90,7 @@ class DisasterBlockchain{
      * @param {object} currentBlockData - an object containing a disaster object as creates in the createNewDisaster method
 	 * @returns {string} - The sha256 of this data.
      */
-    static hashBlock(nonce, previousBlockHash, currentBlockData) {
+    hashBlock(nonce, previousBlockHash, currentBlockData) {
         // concat the previousBlockHash, the currentBlock Data, and the nonce to ensure uniqueness.
         const data = previousBlockHash + nonce.toString() + JSON.stringify(currentBlockData);
         return sha256(data);

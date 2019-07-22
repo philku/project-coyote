@@ -54,7 +54,7 @@ class ResourceBlockchain{
      * @param {string} UNNumber
      * @returns {{resourceID: string, title: string, description: string, UNNumber: string}}
      */
-    static createNewResource({ title, description, UNNumber }){
+    createNewResource({ title, description, UNNumber }){
         return{
             resourceID: uuid().split('-').join(''),
             title,
@@ -80,7 +80,7 @@ class ResourceBlockchain{
      * @param {object} currentBlockData - an object containing a resource object as creates in the createNewResource method
      * @returns {string} - The sha256 of this data.
      */
-    static hashBlock(nonce, previousBlockHash, currentBlockData){
+    hashBlock(nonce, previousBlockHash, currentBlockData){
         // concat the previousBlockHash, the currentBlock Data, and the nonce to ensure uniqueness.
         const data = previousBlockHash + nonce.toString() + JSON.stringify(currentBlockData);
         return sha256(data);
