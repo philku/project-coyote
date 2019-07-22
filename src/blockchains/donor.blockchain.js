@@ -1,333 +1,217 @@
-/**
- * 
- * This blockchain contains all things that will relate to donors
- * and donor information.
- *
- *
- **/ 
-
-
 const sha256 = require('sha256');
 const currentNodeURL = process.argv[3];
 const uuid = require('uuid/v1');
 
-
 /**
- *
- * Donor blockchain contructor
- *
- **/
-
-function DonorBlockchain() {
-	this.chain = [];
-	this.pendingDonors = [];
-
-	this.currentNodeURL = currentNodeURL;
-	this.networkNodes = [];
-
-	// Create genesis block
-	this.createNewBlock(1,'0','0');
-} // end Blockchain() constructor
-
-
-
-/**
- * function createNewBlock - Creates a new block and adds to to the existing blockchain
- *
- *	@param {integer} nonce - The nonce of this block
- *	@param {string} previousBlockHash - The hash of the previous block
- *	@param {string} hash - The hash of this block
- *
- *	@return {object} - The complete block that was added to the blockchain
- *
- *
- **/
-
-DonorBlockchain.prototype.createNewBlock = function(nonce, previousBlockHash, hash) {
-	const newBlock = {
-		index: this.chain.length + 1,
-		timestamp: Date.now(),
-		donors:  this.pendingDonors,
-		nonce,
-		hash,
-		previousBlockHash
-	};
-
-	this.pendingDonors = [];
-	this.chain.push(newBlock);
-	return newBlock;
-}; // end createNewBlock
-
-
-/**
- *
- * function getLastBlock - returns the last block on the blockchain.
- *
- *	@param {none}
- *
- *	@return {object} - The last block that was added to the blockchain
- *
+ * DonorBlockchain Class
  */
+class DonorBlockchain{
+    constructor(){
+        this.chain = [];
+        this.pendingDonors = [];
 
-DonorBlockchain.prototype.getLastBlock = function() {
-	return this.chain[this.chain.length-1];
-}; // end getLastBlock()
+        this.currentNodeURL = currentNodeURL;
+        this.networkNodes = [];
 
+        // Create genesis block
+        this.createNewBlock(1,'0','0');
+    }
 
-/**
- *
- * function createNewDonor - creates a new donor object.
- *
- *	@param {string} email - The email of the donor
- *	@param {string} fname - The first name of the donor
- *	@param {string} lname - The last name of the donor
- *	@param {string} name - The name of the organization
- *  @param {string} wallet_id - the id associated with the user's wallet
- *  @param {string} type - 'org' or 'user' signifying if this is an individual user or an organization
- *
- *	@return {object} - A donor object that can be used in the blockchain
- *
- *
- **/
+    /**
+     * Creates a new block and adds to to the existing blockchain
+     * @param {number} nonce - The nonce of this block
+     * @param {string} previousBlockHash - The hash of the previous block
+     * @param {string} hash - The hash of this block
+     * @returns {{index: number, timestamp: number, donors: Array, nonce: *, hash: *, previousBlockHash: *}} - The complete block that was added to the blockchain
+     */
+    createNewBlock(nonce, previousBlockHash, hash) {
+        const newBlock = {
+            index: this.chain.length + 1,
+            timestamp: Date.now(),
+            donors:  this.pendingDonors,
+            nonce,
+            hash,
+            previousBlockHash
+        };
 
+        this.pendingDonors = [];
+        this.chain.push(newBlock);
+        return newBlock;
+    }; // end createNewBlock
 
-DonorBlockchain.prototype.createNewDonor = function ({ email, fname, lname, organization, name, wallet_id, type }) {
-	const newDonor = {
-		donorID: uuid().split('-').join(''),
-		email: email,
-		fname: fname,
-		lname: lname,
-		name: name,
-		wallet_id: wallet_id,
-		type: type
-	};
-	return newDonor;
-}; // end createNewDonor()
+    /**
+     * Returns the last block on this blockchain
+     * @returns {object} - The last block that was added to the blockchain
+     */
+    getLastBlock(){
+        return this.chain[this.chain.length-1];
+    }
 
+    /**
+	 * creates a new donor object.
+     * @param {string=} email
+     * @param {string=} fname
+     * @param {string=} lname
+     * @param {string=} name
+     * @param {string=} wallet_id
+     * @param {string} type
+     * @returns {{donorID: string, email: string, fname: string, lname: string, name: string, wallet_id: string, type: string}}
+     */
+    static createNewDonor({ email, fname, lname, name, wallet_id, type }) {
+        return{
+            donorID: uuid().split('-').join(''),
+            email: email,
+            fname: fname,
+            lname: lname,
+            name: name,
+            wallet_id: wallet_id,
+            type: type
+        };
+    }
 
-/**
- *
- * function addDonorToPendingDonors - adds a donor to the pendingDonors array, which
- *		will be added to the blockchain when the next block is mined.
- *
- *	@param {object} donorObj - A donor object, created by the createNewDonor method
- *
- *	@return {integer} - the index of the next block that will be mined.
- *
- **/
+    /**
+     * Adds a donor to the pending donors array
+     * @param {object} donorObj
+     * @returns {number} - the index of the next block that will be mined.
+     */
+    addDonorToPendingDonors(donorObj) {
+        this.pendingDonors.push(donorObj);
+        // why does this return the id of the next block?
+        return this.getLastBlock().index + 1;
+    }
 
-DonorBlockchain.prototype.addDonorToPendingDonors = function(donorObj) {
-	this.pendingDonors.push(donorObj);
-	// why does this return the id of the next block?
-	return this.getLastBlock().index + 1;
-};
+    /**
+     * returns the hash of a block given the parameters
+     * @param {number} nonce - The nonce to use for the block.
+     * @param {string} previousBlockHash - the hash of the previous block in the blockchain
+     * @param {object} currentBlockData - an object containing a donor object as creates in the createNewDonor method
+     * @returns {string} - The sha256 of this data.
+     */
+    static hashBlock(nonce, previousBlockHash, currentBlockData){
+        // concat the previousBlockHash, the currentBlock Data, and the nonce to ensure uniqueness.
+        const data = previousBlockHash + nonce.toString() + JSON.stringify(currentBlockData);
+        return sha256(data);
+    }
 
+    /**
+     * Cycles through various nonces to find one that generates an acceptable hash with a specified number of leading zeros.
+     * @param {string} previousBlockHash - the hash of the previous block in the blockchain
+     * @param {object} currentBlockData - an object containing the blockData.
+     * @returns {number} - The nonce that generates an acceptable hash
+     */
+    proofOfWork(previousBlockHash, currentBlockData){
+        let nonce=0;
 
-/**
- *
- * function hashBlock - returns the hash of a block given the parameters
- *
- *	@param {integer} nonce - The nonce to use for the block.
- *	@param {string} previousBlockHash - the hash of the previous block in the blockchain
- *	@param {object} currentBlockData - an object containing the blockData.  For donors, 
- *							{
- *								donors: Array of donor objects
- *								index: The index of the current block being mined
- *							}
- *
- *	@return {string} - The sha256 of this data.
- *
- *
- **/
+        let hash = this.hashBlock(nonce, previousBlockHash, currentBlockData);
 
-DonorBlockchain.prototype.hashBlock = function(nonce, previousBlockHash, currentBlockData) {
-	// concat the previousBlockHash, the currentBlock Data, and the nonce to ensure uniqueness.
-	const data = previousBlockHash + nonce.toString() + JSON.stringify(currentBlockData);
-	const hash = sha256(data);
-	return hash;
-}; // end hashBlock()
+        while(hash.substring(0,4)!=='0000') {
+            nonce++;
+            hash = this.hashBlock(nonce, previousBlockHash,currentBlockData);
+        }
 
-/**
- * function proofOfWork - Cycles through various nonces to find one that 
- *						  generates an acceptable hash with a specified 
- *						  number of leading zeros.
- *
- *	@param {string} previousBlockHash - the hash of the previous block in the blockchain
- *	@param {object} currentBlockData - an object containing the blockData.  For donors, 
- *							{
- *								donors: Array of donor objects
- *								index: The index of the current block being mined
- *							}
- *
- *	@return {integer} - The nonce that generates an acceptable hash
- *	
- *
- **/
+        return nonce;
+    }
 
-DonorBlockchain.prototype.proofOfWork = function(previousBlockHash, currentBlockData) {
-	let nonce=0;
+    /**
+     * Checks if the current chain is valid
+     * @param {array} blockchain - The blockchain to analyze
+     * @returns {boolean} - If the blockchain is valid
+     */
+    isChainValid(blockchain){
+        let isValidChain = true;
 
-	let hash = this.hashBlock(nonce, previousBlockHash, currentBlockData);
+        for(let i=1; i<blockchain.length;i++) {
 
-	while(hash.substring(0,4)!=='0000') {
-		nonce++;
-		hash = this.hashBlock(nonce, previousBlockHash,currentBlockData);
-	}
+            const currentBlock = blockchain[i];
+            const previousBlock = blockchain[i-1];
 
-	//console.log(`${nonce}::${hash}`);
+            // check the previousBlockHash of a block with the hash of the previous block
+            if(currentBlock.previousBlockHash !== previousBlock.hash) {
+                isValidChain = false;
+            }
 
-	return nonce;
-}; // end proofOfWork
+            // verify the block hash.  Just make sure it starts with "0000"
+            const blockHash = this.hashBlock(currentBlock.nonce, previousBlock.hash, {donors: currentBlock.donors, index: currentBlock.index});
+            if(blockHash.substring(0,4) !== '0000') {
+                isValidChain = false;
+            }
+        }
 
-/**
- *
- * function isValidChain - Determines whether the current chain is valid
- *
- *	@param {array} - The blockchain to analyze
- *
- *	@return {boolean} - Whether the blockchain is valid
- *
- **/
+        // check genesis block
+        const genesisBlock = blockchain[0];
+        if(genesisBlock.nonce !==1 || genesisBlock.hash !=='0' || genesisBlock.previousBlockHash !=='0' || genesisBlock.donors.length !==0) {
+            isValidChain = false;
+        }
 
-DonorBlockchain.prototype.isChainValid = function(blockchain) {
-	let isValidChain = true;
+        return isValidChain;
+    }
 
-	for(var i=1; i<blockchain.length;i++) {
+    /**
+     * return a block with the given hash
+     * @param {string} blockHash - The block hash to search for
+     * @returns {object | null} - The block with the given hash.  null if the has is not found.
+     */
+    getBlock(blockHash){
+        // get a block with a certain blockHash and return it
+        let correctBlock = null;
 
-		const currentBlock = blockchain[i];
-		const previousBlock = blockchain[i-1];
+        this.chain.forEach((block) => {
+            // need to break out of this forEach if/when the block is found
+            if(block.hash === blockHash) {
+                correctBlock = block;
+            }
+        });
 
-		// check the previousBlockHash of a block with the hash of the previous block
-		if(currentBlock.previousBlockHash !== previousBlock.hash) {
-			isValidChain = false;
-		}
+        return correctBlock;
+    }
 
-		// verify the block hash.  Just make sure it starts with "0000"
-		const blockHash = this.hashBlock(currentBlock.nonce, previousBlock.hash, {donors: currentBlock.donors, index: currentBlock.index});
-		if(blockHash.substring(0,4) !== '0000') {
-			isValidChain = false;
-		}
-	}
+    /**
+	 * returns the information of a donor with a given donorID
+     * @param {string} donorID - the ID of the donor
+     * @returns {{donorData: {}}} - An object with the donor information.  Returns an empty object
+     *					   			if the donor is not found.
+     */
+    getDonorData({ donorID }) {
+        let donorData = {};
+        let found = false;
 
-	// check genesis block
-	const genesisBlock = blockchain[0];
-	if(genesisBlock.nonce !==1 || genesisBlock.hash !=='0' || genesisBlock.previousBlockHash !=='0' || genesisBlock.donors.length !==0) {
-		isValidChain = false;
-	}
+        for (let x = this.chain.length - 1; x > 0; x--) {
+            const theBlock = this.chain[x];
+            theBlock.donors.forEach((donor) => {
+                if (donorData.donorID === donorID) {
+                    donorData = donor;
+                    found = true;
+                }
+            });
 
-	return isValidChain;
-}; // end isChainValid()
+            if (found) {
+                break;
+            }
+        }
 
+        return {
+            donorData
+        }
+    }
 
-/**
- *
- * function getBlock - return a block with the given hash
- *
- *	@param {string} - The block hash to search for
- *
- *	@return {object | null} - The block with the given hash.  null if the has is not found.
- *
- **/
+    /**
+	 * mines the next block
+     * @returns {{index: number, timestamp: number, donors: Array, nonce: *, hash: *, previousBlockHash: *}}
+     */
+    mine(){
+        const lastBlock = this.getLastBlock();
+        const previousBlockHash = lastBlock.hash;
 
-DonorBlockchain.prototype.getBlock = function(blockHash) {
-	// get a block with a certain blockHash and return it
-	let correctBlock = null;
+        // currentBlockData can take anything you want to put in here
+        const currentBlockData = {
+            donors: this.pendingDonors,
+            index: lastBlock.index + 1
+        };
+        const nonce = this.proofOfWork(previousBlockHash, currentBlockData);
+        const blockHash = this.hashBlock(nonce, previousBlockHash, currentBlockData);
+        return this.createNewBlock(nonce, previousBlockHash, blockHash);
+    }
+}
 
-	this.chain.forEach((block) => {
-		// need to break out of this forEach if/when the block is found
-		if(block.hash === blockHash) {
-			correctBlock = block;
-		}
-	});
-
-	return correctBlock;
-};
-
-/**
- *
- * function getDonorData - returns the information of a donor with a given donorID
- *
- *	@param {string} donorID - the ID of the donor
- *
- *	@return {object} - An object with the donor information.  Returns an empty object 
- *					   if the donor is not found.
- *
- **/
- 
-DonorBlockchain.prototype.getDonorData = function({ donorID }) {
-	let donorData = {};
-	let found = false;
-
-	for(let x=this.chain.length-1; x>0; x--) {
-		const theBlock = this.chain[x];
-		theBlock.donors.forEach((donor) => {
-			if(donorData.donorID == donorID) {
-				donorData = donor;
-				found = true;
-			}
-		});
-
-		if(found) {
-			break;
-		}
-	}
-
-	return {
-		donorData
-	}
-};
-
-/**
- *
- * function mine - mines the next block
- *
- *	@return {object} - The complete block that was added to the blockchain
- *
- **/
-DonorBlockchain.prototype.mine = function () {
-    const lastBlock = this.getLastBlock();
-    const previousBlockHash = lastBlock.hash;
-
-    // currentBlockData can take anything you want to put in here
-    const currentBlockData = {
-        donors: this.pendingDonors,
-        index: lastBlock.index + 1
-    };
-    const nonce = this.proofOfWork(previousBlockHash, currentBlockData);
-    const blockHash = this.hashBlock(nonce, previousBlockHash, currentBlockData);
-    return this.createNewBlock(nonce, previousBlockHash, blockHash);
-};
-
-
-//////////////////// below here needs reviewed for donor content
-
-
-/**
- * I do not think this (or its equivalent form) is needed.. . commenting out
-   but keeping for now. . . 
-
-DonorBlockchain.prototype.getTransaction = function(transactionID) {
-	// get a block with a certain blockHash and return it
-	let correctBlockTransaction = null;
-	let correctBlock = null;
-
-	this.chain.forEach((block) => {
-		block.transactions.forEach((transaction) => {
-			if(transaction.transactionID === transactionID) {
-				correctTransaction = transaction;
-				correctBlock = block;
-			}
-		});
-
-	});
-
-	return {
-		transaction: correctTransaction,
-		block: correctBlock
-	};
-};
-
- *
- **/
 
 module.exports = DonorBlockchain;
