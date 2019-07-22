@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "ls -l",
-    "start": "nodemon --watch src -e js src/app.js"
+    "start": "nodemon --watch src -e js src/app.js",
+    "doc": "jsdoc -c conf/jsdoc.json"
   },
   "author": "Bob Deemer, Dylan Wiafe, Phil Kubin",
   "license": "ISC",
@@ -17,5 +18,12 @@
     "request-promise": "^4.2.2",
     "sha256": "^0.2.0",
     "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "jsdoc": "^3.6.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/philku/project-coyote.git"
   }
 }
