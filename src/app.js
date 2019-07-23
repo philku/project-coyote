@@ -159,6 +159,15 @@ app.get('/donations?/mine', (req,res) => {
 
 
 // Other
+app.get('/blockchain/all',(req,res)=>{
+    let allBlockchains = {
+        donorBlockchain: donorBlockchain,
+        disasterBlockchain: disasterBlockchain,
+        resourceBlockchain: resourceBlockchain,
+        donationBlockchain: donationBlockchain
+    };
+    res.send(allBlockchains);
+});
 app.get('*', (req,res) => {
 	res.status(404).send(Error('Invalid request'));
 });
