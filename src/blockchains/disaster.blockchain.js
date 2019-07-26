@@ -67,7 +67,7 @@ class DisasterBlockchain{
      * @param {string} recipientPostalCode -
      * @param {string} recipientCountry -
 	 * @param {boolean} [isActive=true] - Whether the disaster is active
-     * @returns {{disasterID: string, isActive: boolean, latitude: *, longitude: *, city: *, state: *, country: *, type: *, description: *}} - A donor object that can be used in the blockchain
+     * @returns {{type: *, owner: *, ownerType: *, creator: *, description: *, latitude: *, longitude: *, city: *, state: *, country: *, recipientName: *, recipientAddressLine1: *, recipientAddressLine2: *, recipientCity: *, recipientState: *, recipientPostalCode: *, recipientCountry: *, isActive: boolean}} - A donor object that can be used in the blockchain
      */
     createNewDisaster({type,owner,ownerType,creator,description,latitude,longitude,city,state,country,
                       recipientName,recipientAddressLine1,recipientAddressLine2,recipientCity,
