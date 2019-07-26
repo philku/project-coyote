@@ -49,27 +49,48 @@ class DisasterBlockchain{
 
     /**
 	 * Formats input into a disaster object with an ID
-	 * @param {boolean} [isActive=true] - Whether the disaster is active
+     * @param {string} type - The type of the disaster (e.g. Wildfire, Hurricane, Typhoon, Earthquake)
+     * @param {string} owner - The oid/uid for the disaster admin of the disaster
+     * @param {string} ownerType - 'org' or 'user' depending on owner type
+     * @param {string} creator - uid of the user that created the disaster
+     * @param {string} description - Freeform notes about the disaster
      * @param {string} latitude - The latitude of the disaster
      * @param {string} longitude - The longitude of the disaster
      * @param {string} city - The nearest city of the disaster
-     * @param {string} [state=null] - The nearest state of the disaster
+     * @param {string} state - The nearest state of the disaster
      * @param {string} country - The nearest country of the disaster
-     * @param {string} type - The type of the disaster (e.g. Wildfire, Hurricane, Typhoon, Earthquake)
-     * @param {string} description - Freeform notes about the disaster
+     * @param {string} recipientName - POC on site to receive shipments
+     * @param {string} recipientAddressLine1 -
+     * @param {string} recipientAddressLine2 -
+     * @param {string} recipientCity -
+     * @param {string} recipientState -
+     * @param {string} recipientPostalCode -
+     * @param {string} recipientCountry -
+	 * @param {boolean} [isActive=true] - Whether the disaster is active
      * @returns {{disasterID: string, isActive: boolean, latitude: *, longitude: *, city: *, state: *, country: *, type: *, description: *}} - A donor object that can be used in the blockchain
      */
-    createNewDisaster({ isActive = true, latitude, longitude, city, state=null, country, type, description }) {
+    createNewDisaster({type,owner,ownerType,creator,description,latitude,longitude,city,state,country,
+                      recipientName,recipientAddressLine1,recipientAddressLine2,recipientCity,
+                      recipientState,recipientPostalCode,recipientCountry,isActive=true}) {
         return{
-            disasterID: uuid().split('-').join(''),
-            isActive,
+            type,
+            owner,
+            ownerType,
+            creator,
+            description,
             latitude,
             longitude,
             city,
             state,
             country,
-            type,
-            description
+            recipientName,
+            recipientAddressLine1,
+            recipientAddressLine2,
+            recipientCity,
+            recipientState,
+            recipientPostalCode,
+            recipientCountry,
+            isActive
         };
 	}
 
