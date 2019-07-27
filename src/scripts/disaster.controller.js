@@ -78,24 +78,24 @@ function newDisaster(req, res, disasterBlockchain) {
 	}
 
     const disaster = {
-        type: req.query.type,
+        type: req.body.type,
         owner: req.body.owner,
         ownerType: ownerType(req.body.owner, req.body.creator),
         creator: req.body.creator,
-        description: req.query.description,
-        latitude: req.query.latitude,
-        longitude: req.query.longitude,
-        city: req.query.city,
-        state: req.query.state,
-        country: req.query.country,
-        recipientName: req.query.recipientName,
-        recipientAddressLine1: req.query.recipientAddressLine1,
-        recipientAddressLine2: req.query.recipientAddressLine2,
-        recipientCity: req.query.recipientCity,
-        recipientState: req.query.recipientState,
-        recipientPostalCode: req.query.recipientPostalCode,
-        recipientCountry: req.query.recipientCountry,
-        isActive: req.query.isActive
+        description: req.body.description,
+        latitude: req.body.latitude,
+        longitude: req.body.longitude,
+        city: req.body.city,
+        state: req.body.state,
+        country: req.body.country,
+        recipientName: req.body.recipientName,
+        recipientAddressLine1: req.body.recipientAddressLine1,
+        recipientAddressLine2: req.body.recipientAddressLine2,
+        recipientCity: req.body.recipientCity,
+        recipientState: req.body.recipientState,
+        recipientPostalCode: req.body.recipientPostalCode,
+        recipientCountry: req.body.recipientCountry,
+        isActive: req.body.isActive
     };
 
     let newDisasterObj = disasterBlockchain.createNewDisaster(disaster);

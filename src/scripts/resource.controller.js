@@ -51,10 +51,12 @@ function newResource(req, res, resourceBlockchain){
 
     // Hardcoded for now
     const resourceObject = {
-        name: req.body.name,
+        title: req.body.title,
         description: req.body.description,
         nsn: req.body.nsn,
-        quantity: req.body.quantity
+        quantity: req.body.quantity,
+        units: req.body.units,
+        disasterID: req.body.disasterID
     };
 
     let newResourceObj = resourceBlockchain.createNewResource(resourceObject);
@@ -62,6 +64,26 @@ function newResource(req, res, resourceBlockchain){
     resourceBlockchain.mine();
     res.send(newResourceObj.resourceID);
 } // end newResource()
+
+function addMultipleResources(req,res,resourceBlockchain){
+    let resources = req.body.resources;
+    let resourceLength = resources.length;
+
+    resources.forEach(resource => {
+        resourceBlockchain.addResourceToPendingResources(resourceBlockchain.createNewResource({
+            disasterID: resource.disasterID,
+            title: resource.title,
+            description: resource.description,
+            nsn: resource.nsn,
+            quantity: resource.quantity,
+            units: resource.units
+        }));
+        resourceLength--;
+        if(resourceLength === 0){
+            res.send(resourceBlockchain.mine());
+        }
+    });
+}
 
 function addInitialResources(req, res, resourceBlockchain) {
     const resourceObject = {
@@ -106,5 +128,6 @@ module.exports = {
     listResources,
     resourceDetail,
 	newResource,
-    addInitialResources
+    addInitialResources,
+    addMultipleResources
 };

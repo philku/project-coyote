@@ -73,6 +73,7 @@ class DisasterBlockchain{
                       recipientName,recipientAddressLine1,recipientAddressLine2,recipientCity,
                       recipientState,recipientPostalCode,recipientCountry,isActive=true}) {
         return{
+            disasterID: uuid().split('-').join(''),
             type,
             owner,
             ownerType,
