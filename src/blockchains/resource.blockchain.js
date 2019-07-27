@@ -54,16 +54,18 @@ class ResourceBlockchain{
      * @param {string} nsn
      * @param {number} quantity
      * @param {string} units
+     * @param {string} disasterID
      * @returns {{resourceID: *|string, title: *, description: *, nsn: *, quantity: *, units: *}}
      */
-    createNewResource({ title, description, nsn , quantity, units}){
+    createNewResource({ title, description, nsn , quantity, units, disasterID}){
         return{
             resourceID: uuid().split('-').join(''),
             title,
             description,
             nsn,
             quantity,
-            units
+            units,
+            disasterID
         };
     }
 
@@ -191,7 +193,7 @@ class ResourceBlockchain{
     }
 
     /**
-	 * Gets resource by given number
+	 * Gets resource by given parameter
      * @param paramKey
      * @param paramVal
      * @returns {{resourceData: {}}}

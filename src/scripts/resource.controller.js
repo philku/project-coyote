@@ -124,10 +124,33 @@ function addInitialResources(req, res, resourceBlockchain) {
     res.send('done');
 } // end addInitialResources()
 
+function getResourcesForDisaster(disasterID,resourceBlockchain){
+    console.log(`getResourcesForDisaster(${disasterID},${resourceBlockchain})`);
+
+    // Returns an array of donation objects for a given disasterID
+    const chainLength = resourceBlockchain.chain.length;
+    let resourceArray = [];
+
+    for(let i=1;i<chainLength;i++) {
+        const thisBlock = resourceBlockchain.chain[i];
+        thisBlock.resources.forEach((resource) => {
+            console.log(resource);
+            if(resource.disasterID === disasterID) {
+                resourceArray.push(resource);
+            }
+        });
+    }
+
+    console.log('resourceArray: ', resourceArray);
+    return(resourceArray);
+
+}
+
 module.exports = {
     listResources,
     resourceDetail,
 	newResource,
     addInitialResources,
-    addMultipleResources
+    addMultipleResources,
+    getResourcesForDisaster
 };

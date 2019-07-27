@@ -138,6 +138,10 @@ app.get('/resources?/mine', (req,res) => {
 app.get('/resources?/addInitial', (req,res) => {
     resource.addInitialResources(req,res,resourceBlockchain);
 });
+// Get resources for a given disaster
+app.get('/resources?/disaster/:disasterID', (req,res) => {
+    res.send(resource.getResourcesForDisaster(req.params.disasterID,resourceBlockchain));
+});
 
 
 // Donation Details
@@ -159,6 +163,10 @@ app.get('/donations?/mine', (req,res) => {
     console.log('donations in this block: ', newBlock);
     res.send('donations in this block: ', newBlock);
 
+});
+// Get donations for a given disaster
+app.get('/donations?/disaster/:disasterID', (req,res)=>{
+    res.send(donation.getDonationsForDisaster(req.params.disasterID,donationBlockchain));
 });
 
 
