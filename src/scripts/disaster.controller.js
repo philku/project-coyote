@@ -68,14 +68,34 @@ function listDisasters(req, res, disasterBlockchain) {
 
 function newDisaster(req, res, disasterBlockchain) {
 
+	// Returns 'org' if org, 'user' if user
+	function ownerType(owner,creator){
+		if(owner === creator){
+			return 'user';
+		}else{
+			return 'org';
+		}
+	}
+
     const disaster = {
+        type: req.body.type,
+        owner: req.body.owner,
+        ownerType: ownerType(req.body.owner, req.body.creator),
+        creator: req.body.creator,
+        description: req.body.description,
         latitude: req.body.latitude,
         longitude: req.body.longitude,
         city: req.body.city,
         state: req.body.state,
         country: req.body.country,
-        type: req.body.type,
-        description: req.body.description
+        recipientName: req.body.recipientName,
+        recipientAddressLine1: req.body.recipientAddressLine1,
+        recipientAddressLine2: req.body.recipientAddressLine2,
+        recipientCity: req.body.recipientCity,
+        recipientState: req.body.recipientState,
+        recipientPostalCode: req.body.recipientPostalCode,
+        recipientCountry: req.body.recipientCountry,
+        isActive: req.body.isActive
     };
 
     let newDisasterObj = disasterBlockchain.createNewDisaster(disaster);

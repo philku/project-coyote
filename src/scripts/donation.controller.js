@@ -121,7 +121,8 @@ function listDonations( req, res, donationBlockchain, resourceBlockchain, donorB
 	res.send(responseObj);
 } // end listDonations
 
-function getDonationsForDisaster({disasterID, donationBlockchain}) {
+function getDonationsForDisaster(disasterID, donationBlockchain) {
+    console.log(`getDonationsForDisaster(${disasterID},${donationBlockchain})`);
 	// Returns an array of donation objects for a given disasterID
     const chainLength = donationBlockchain.chain.length;
     let donationArray = [];
@@ -129,16 +130,20 @@ function getDonationsForDisaster({disasterID, donationBlockchain}) {
     for(let i=1;i<chainLength;i++) {
         const thisBlock = donationBlockchain.chain[i];
         thisBlock.donations.forEach((donation) => {
+            console.log(donation);
             if(donation.disasterID === disasterID) {
                 donationArray.push(donation);
             }
         });
     }
+
+    console.log('donationArray: ', donationArray);
     return(donationArray);
 }
 
 module.exports = {
     listDonations,
     donationDetail,
-    newDonation
+    newDonation,
+    getDonationsForDisaster
 };

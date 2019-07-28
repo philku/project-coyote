@@ -119,8 +119,12 @@ app.get('/resources', (req,res) => {
     resource.listResources(req,res,resourceBlockchain);
 });
 // New Resource
-app.post('/resources?/new', (req,res) => {
+app.post('/resource/new', (req,res) => {
     resource.newResource(req,res,resourceBlockchain);
+});
+// Multiple resources
+app.post('/resources/new', (req,res) => {
+    resource.addMultipleResources(req,res,resourceBlockchain);
 });
 // Mine Resource Block
 app.get('/resources?/mine', (req,res) => {
@@ -133,6 +137,10 @@ app.get('/resources?/mine', (req,res) => {
 // Mine Resource Block
 app.get('/resources?/addInitial', (req,res) => {
     resource.addInitialResources(req,res,resourceBlockchain);
+});
+// Get resources for a given disaster
+app.get('/resources?/disaster/:disasterID', (req,res) => {
+    res.send(resource.getResourcesForDisaster(req.params.disasterID,resourceBlockchain));
 });
 
 
@@ -156,9 +164,22 @@ app.get('/donations?/mine', (req,res) => {
     res.send('donations in this block: ', newBlock);
 
 });
+// Get donations for a given disaster
+app.get('/donations?/disaster/:disasterID', (req,res)=>{
+    res.send(donation.getDonationsForDisaster(req.params.disasterID,donationBlockchain));
+});
 
 
 // Other
+app.get('/blockchain/all',(req,res)=>{
+    let allBlockchains = {
+        donorBlockchain: donorBlockchain,
+        disasterBlockchain: disasterBlockchain,
+        resourceBlockchain: resourceBlockchain,
+        donationBlockchain: donationBlockchain
+    };
+    res.send(allBlockchains);
+});
 app.get('*', (req,res) => {
 	res.status(404).send(Error('Invalid request'));
 });

@@ -51,15 +51,21 @@ class ResourceBlockchain{
 	 * Formats input into a resource object with an ID
      * @param {string} title
      * @param {string} description
-     * @param {string} UNNumber
-     * @returns {{resourceID: string, title: string, description: string, UNNumber: string}}
+     * @param {string} nsn
+     * @param {number} quantity
+     * @param {string} units
+     * @param {string} disasterID
+     * @returns {{resourceID: *|string, title: *, description: *, nsn: *, quantity: *, units: *}}
      */
-    createNewResource({ title, description, UNNumber }){
+    createNewResource({ title, description, nsn , quantity, units, disasterID}){
         return{
             resourceID: uuid().split('-').join(''),
             title,
             description,
-            UNNumber
+            nsn,
+            quantity,
+            units,
+            disasterID
         };
     }
 
@@ -187,7 +193,7 @@ class ResourceBlockchain{
     }
 
     /**
-	 * Gets resource by given number
+	 * Gets resource by given parameter
      * @param paramKey
      * @param paramVal
      * @returns {{resourceData: {}}}
